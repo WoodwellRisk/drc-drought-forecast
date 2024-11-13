@@ -10,8 +10,8 @@ function Index() {
   const isWide = useBreakpointIndex() > 0
   const [expanded, setExpanded] = useState(false)
   const [colorMode, setColorMode] = useColorMode()
-  const description = 'Woodwell Climate Research Center risk data'
-  const title = 'Woodwell Risk data viewer'
+  const description = 'Woodwell Risk drought forecast for the Democratic Republic of the Congo'
+  const title = 'Woodwell Risk DRC drought forecast'
   const logoURL = 'https://storage.googleapis.com/risk-maps/media/woodwell-risk.png'
 
   useEffect(() => {
