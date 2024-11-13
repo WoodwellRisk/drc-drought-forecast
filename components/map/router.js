@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { usePathname } from 'next/navigation'
 import { useMapbox } from '@carbonplan/maps'
@@ -14,14 +14,38 @@ const Router = () => {
     const setBand = useStore((state) => state.setBand)
     const setVarTags = useStore((state) => state.setVarTags)
 
+    const verifySearchParams = useCallback((url) => {
+        // check to see if there are other search params that shouldn't be there
+        url.searchParams.forEach(function (value, key) {
+            if (!['layer'].includes(key)) {
+                url.searchParams.delete(key)
+            }
+        })
+    })
+
+    const getInitialLayer = useCallback((url) => {
+        let initialLayer
+        let tempLayer = url.searchParams.get("layer")
+
+        if (tempLayer != null && typeof tempLayer == 'string' && ['percentile', 'agreement'].includes(tempLayer)) {
+            initialLayer = tempLayer
+        } else {
+            initialLayer = 'percentile'
+        }
+
+        url.searchParams.set('layer', initialLayer)
+        return initialLayer
+    })
+
     useEffect(() => {
         const url = new URL(window.location)
-        let savedBand = url.searchParams.get("band") != null ? url.searchParams.get("band") : 'percentile'
+        verifySearchParams(url)
+        let savedBand = getInitialLayer(url)
         setBand(savedBand)
         setVarTags({percentile: savedBand == 'percentile', agreement: savedBand == 'agreement'})
         
-        if(!url.searchParams.has("band")) {
-            url.searchParams.set("band", savedBand)
+        if(!url.searchParams.has("layer")) {
+            url.searchParams.set("layer", savedBand)
         }
 
         router.replace(`${pathname}?${url.searchParams}`)
@@ -34,7 +58,7 @@ const Router = () => {
 
     useEffect(() => {
         const url = new URL(window.location)
-        url.searchParams.set('band', band)
+        url.searchParams.set('layer', band)
         router.push(`${pathname}?${url.searchParams}`)
     }, [band])
 
