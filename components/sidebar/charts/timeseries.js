@@ -1,6 +1,7 @@
-import { Box } from 'theme-ui'
+import { Box, Text } from 'theme-ui'
 import { AxisLabel, Chart, Circle, Grid, Line, Plot, Ticks, TickLabels } from '@carbonplan/charts'
 
+import StraightLine from '../icons/straight-line'
 import useStore from '../../store/index'
 
 const TimeSeries = ({ data }) => {
@@ -53,23 +54,33 @@ const TimeSeries = ({ data }) => {
                             }}
                         />
 
-                        <Line data={data['percentile'].map((d, idx) => [idx, d[1]])} width={2} />
+                        <Line data={data['percentile'].map((d, idx) => [idx, d[1]])} width={2} color='primary' />
 
-                        <Line data={data['agreement'].map((d, idx) => [idx, d[1]])} width={2} color='gray' />
+                        <Line data={data['agreement'].map((d, idx) => [idx, d[1]])} width={2} color='secondary' />
 
                         {/* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every */}
                         {!data[band].every((value) => isNaN(value[1])) && (
                             <Circle
                                 x={sliderIndex}
                                 y={data[band][sliderIndex][1]}
-                                color={band == 'percentile' ? 'black' : 'gray'}
+                                color={band == 'percentile' ? 'primary' : 'secondary'}
                                 size={16}
                             />
                         )}
 
                     </Plot>
                 </Chart>
+
+                <Box sx={{display: 'inline-block', mt: [2], pl:[1]}}>
+                    <StraightLine sx={{color: 'primary'}} />
+                    <Text sx={{ml: 2, color: 'primary'}}>Percentile</Text>
+                </Box>
+                <Box sx={{display: 'inline-block', pl: [2]}}>
+                    <StraightLine sx={{color: 'secondary'}} />
+                    <Text sx={{ml: 2, color: 'secondary'}}>Agreement</Text>
+                </Box>
             </Box>
+
         </>
     )
 }
