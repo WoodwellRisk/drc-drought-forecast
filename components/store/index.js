@@ -75,7 +75,7 @@ const useStore = create((set, get) => ({
     showLandOutline: true,
     setShowLandOutline: (showLandOutline) => set({ showLandOutline }),
 
-    showCountriesOutline: false,
+    showCountriesOutline: true,
     setShowCountriesOutline: (showCountriesOutline) => set({ showCountriesOutline }),
 
     showStatesOutline: false,
