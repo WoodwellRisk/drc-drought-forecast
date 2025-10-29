@@ -10,6 +10,7 @@ function Index() {
   const isWide = useBreakpointIndex() > 0
   const [expanded, setExpanded] = useState(false)
   const [colorMode, setColorMode] = useColorMode()
+  
   const description = 'Woodwell Risk drought forecast for the Democratic Republic of the Congo'
   const title = 'Woodwell Risk DRC drought forecast'
   const logoURL = 'https://storage.googleapis.com/risk-maps/media/woodwell-risk.png'
@@ -24,11 +25,9 @@ function Index() {
         <Layout
           description={description}
           title={title}
-          header={false}
           dimmer={false}
           footer={false}
           metadata={false}
-          guide={'teal'}
         >
           <Desktop />
         </Layout>
@@ -39,11 +38,9 @@ function Index() {
             description={description}
             title={title}
             card={logoURL}
-            header={true}
             dimmer={true}
             metadata={false}
             footer={false}
-            guide={'teal'}
             settings={{
               value: expanded,
               onClick: () => setExpanded(!expanded),

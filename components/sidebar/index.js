@@ -23,6 +23,9 @@ const Sidebar = () => {
 
   const sx = {
     'sidebar-container': {
+      position: 'relative',
+      zIndex: 100,
+      display: ['none', 'flex', 'flex'],
       maxWidth: [
         0,
         '350px',
@@ -36,12 +39,10 @@ const Sidebar = () => {
       borderWidth: '0px',
       borderRightWidth: '1px',
       borderColor: 'muted',
-      zIndex: 900,
       backgroundColor: 'background',
-      display: ['none', 'flex', 'flex'],
     },
     'about-section': {
-      mx: [3, 4, 5, 5],
+      mx: [3, 4, 5, 6],
       pt: [1],
       mt: ['12px'],
       fontSize: [2, 2, 2, 3],
@@ -74,7 +75,7 @@ const Sidebar = () => {
       mb: [5],
       mx: 'auto',
       width: '100%',
-      height: '225px',
+      height: '215px',
     },
   }
 

@@ -4,6 +4,7 @@ import { alpha } from '@theme-ui/color'
 
 // This component is modeled after the SidebarFooter component: 
 // https://github.com/carbonplan/layouts/blob/main/src/sidebar/sidebar-footer.js
+
 const Footer = () => {
     const sx = {
         code: {

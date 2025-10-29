@@ -60,7 +60,7 @@ const StatsDisplay = ({ data }) => {
     <>
       <Box
         sx={{
-          ml: [2],
+          ml: [0],
           mt: ['-1px'],
           fontFamily: 'mono',
           letterSpacing: 'mono',

@@ -19,8 +19,8 @@ const TimeSeries = ({ data }) => {
         chart: {
             mt: [],
             mx: 'auto',
-            pl: [0, 1, 1, 0],
-            pr: [0, 1, 1, 1,],
+            pl: [0, 0, 0, 0],
+            pr: [0, 0, 0, 0,],
             width: '100%',
             height: '200px',
         }
@@ -32,7 +32,7 @@ const TimeSeries = ({ data }) => {
     return (
         <>
             <Box sx={{ ...sx.chart }} className='chart-container'>
-                <Chart x={[0, 5]} y={yTicks} padding={{ left: 60, top: 30 }}>
+                <Chart x={[0, 5]} y={yTicks} padding={{ left: 50, top: 30 }}>
                     <Grid vertical horizontal />
                     <Ticks left bottom />
                     <TickLabels left />
@@ -64,20 +64,22 @@ const TimeSeries = ({ data }) => {
                                 x={sliderIndex}
                                 y={data[band][sliderIndex][1]}
                                 color={band == 'percentile' ? 'primary' : 'secondary'}
-                                size={16}
+                                size={14}
                             />
                         )}
 
                     </Plot>
                 </Chart>
 
-                <Box sx={{display: 'inline-block', mt: [2], pl:[1]}}>
-                    <StraightLine sx={{color: 'primary'}} />
-                    <Text sx={{ml: 2, color: 'primary'}}>Percentile</Text>
-                </Box>
-                <Box sx={{display: 'inline-block', pl: [2]}}>
-                    <StraightLine sx={{color: 'secondary'}} />
-                    <Text sx={{ml: 2, color: 'secondary'}}>Agreement</Text>
+                <Box sx={{display: 'flex', mt: [2], justifyContent: 'space-around'}}>
+                    <Box>
+                        <StraightLine sx={{color: 'primary'}} />
+                        <Text sx={{ml: 2, color: 'primary', fontSize: 13}}>Percentile</Text>
+                    </Box>
+                    <Box>
+                        <StraightLine sx={{color: 'secondary'}} />
+                        <Text sx={{ml: 2, color: 'secondary', fontSize: 13}}>Agreement</Text>
+                    </Box>
                 </Box>
             </Box>
 

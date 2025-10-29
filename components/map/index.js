@@ -1,16 +1,20 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useThemeUI, Box } from 'theme-ui'
 import { useThemedColormap } from '@carbonplan/colormaps'
 import { Map as MapContainer, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
 import { Dimmer } from '@carbonplan/components'
+import LayerOrder from './layer-order'
 import Ruler from './ruler'
 import Router from './router'
+import ZoomReset from './zoom-reset'
 
 import useStore from '../store/index'
 
 const Map = ({ mobile }) => {
   const { theme } = useThemeUI()
   const container = useRef(null)
+  const center = useStore((state) => state.center)
+  const zoom = useStore((state) => state.zoom)
   const bounds = useStore((state) => state.bounds)
 
   const display = useStore((state) => state.display)
@@ -57,94 +61,104 @@ const Map = ({ mobile }) => {
   )
 
   return (
-    <Box ref={container} sx={{flexBasis: '100%', 'canvas.mapboxgl-canvas:focus': {outline: 'none', },}} >
-      <MapContainer maxBounds={bounds}  >
-      {showOceanMask && (
-            <Fill
-              color={theme.rawColors.background}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/ocean'}
-              variable={'ocean'}
-            />
-          )}
-
-          {showStatesOutline && (
-            <Line
-              color={theme.rawColors.secondary}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/states'}
-              variable={'states'}
-              width={1}
-            />
-          )}
-
-          {showCountriesOutline && (
-            <Line
-              color={theme.rawColors.primary}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/countries'}
-              variable={'countries'}
-              width={1}
-            />
-          )}
-
-        {showLakes && (
-            <Fill
-              color={theme.rawColors.background}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/lakes'}
-              variable={'lakes'}
-            />
-          )}
-
-        {showLakes && (
-            <Line
-              color={theme.rawColors.primary}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/lakes'}
-              variable={'lakes'}
-              width={1}
-            />
-          )}
-
-          {showLandOutline && (
-            <Line
-              color={theme.rawColors.primary}
-              source={'https://storage.googleapis.com/drc-drought-forecast/vector/land'}
-              variable={'land'}
-              width={1}
-            />
-          )}
-
-          {showRegionPicker && (
-            <RegionPicker
-              color={theme.colors.primary}
-              backgroundColor={theme.colors.background}
-              fontFamily={theme.fonts.mono}
-              fontSize={'14px'}
-              minRadius={1}
-              maxRadius={1500}
-            />
-          )}
-
-          <Raster
-            key={variable}
-            colormap={colormap}
-            clim={clim}
-            display={display}
-            opacity={opacity}
-            mode={'texture'}
-            source={`https://storage.googleapis.com/drc-drought-forecast/zarr/drc-drought.zarr`}
-            variable={ variable }
-            selector={{ band, forecast }}
-            regionOptions={{ 
-              setData: handleRegionData, 
-              selector: {band: bandArray, forecast: forecastArray} 
-            }}
+    <Box ref={container} sx={{ flexBasis: '100%', 'canvas.mapboxgl-canvas:focus': { outline: 'none', }, }} >
+      <MapContainer zoom={zoom} center={center} maxBounds={bounds} >
+        {showOceanMask && (
+          <Fill
+            id={'ocean'}
+            color={theme.rawColors.background}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/ocean'}
+            variable={'ocean'}
           />
+        )}
 
-          {!mobile && (<Ruler />)}
+        {showCountriesOutline && (
+          <Line
+            id={'countries'}
+            color={theme.rawColors.primary}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/countries'}
+            variable={'countries'}
+            width={showStatesOutline && zoom > 2.5 ? 1.75 : 1}
+          />
+        )}
 
-          <Router />
+        {showStatesOutline && (
+          <Line
+            id={'states'}
+            color={theme.rawColors.secondary}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/states'}
+            variable={'states'}
+            width={zoom < 4 ? 0.5 : 1}
+          />
+        )}
+
+        {showLakes && (
+          <Fill
+            id={'lakes-fill'}
+            color={theme.rawColors.background}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/lakes'}
+            variable={'lakes'}
+          />
+        )}
+
+        {showLakes && (
+          <Line
+            id={'lakes'}
+            color={theme.rawColors.primary}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/lakes'}
+            variable={'lakes'}
+            width={1}
+          />
+        )}
+
+        {showLandOutline && (
+          <Line
+            id={'land'}
+            color={theme.rawColors.primary}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector/land'}
+            variable={'land'}
+            width={1}
+          />
+        )}
+
+        {showRegionPicker && (
+          <RegionPicker
+            color={theme.colors.primary}
+            backgroundColor={theme.colors.background}
+            fontFamily={theme.fonts.mono}
+            fontSize={'14px'}
+            minRadius={1}
+            maxRadius={1500}
+          />
+        )}
+
+        <Raster
+          key={variable}
+          colormap={colormap}
+          clim={clim}
+          display={display}
+          opacity={opacity}
+          mode={'texture'}
+          source={`https://storage.googleapis.com/drc-drought-forecast/zarr/drc-drought.zarr`}
+          variable={variable}
+          selector={{ band, forecast }}
+          regionOptions={{
+            setData: handleRegionData,
+            selector: { band: bandArray, forecast: forecastArray }
+          }}
+        />
+
+        <Ruler mobile={mobile} />
+
+        <ZoomReset mobile={mobile} />
+
+        <Router />
+
+        <LayerOrder />
 
       </MapContainer>
 
-      {!mobile && (<Dimmer 
+      {!mobile && (<Dimmer
         sx={{
           display: ['initial', 'initial', 'initial', 'initial'],
           position: 'absolute',

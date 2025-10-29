@@ -2,8 +2,11 @@ import { create } from 'zustand'
 
 const useStore = create((set, get) => ({
     // map container state
-    zoom: 1,
+    zoom: 4.20,
     setZoom: (zoom) => set({ zoom }),
+
+    center: [20.50, -3.33],
+    setCenter: (center) => set({ center }),
 
     maxZoom: 8,
 
@@ -72,6 +75,9 @@ const useStore = create((set, get) => ({
     showRegionPicker: false,
     setShowRegionPicker: (showRegionPicker) => set({ showRegionPicker }),
 
+    showOceanMask: true,
+    setShowOceanMask: (showOceanMask) => set({ showOceanMask }),
+
     showLandOutline: true,
     setShowLandOutline: (showLandOutline) => set({ showLandOutline }),
 
@@ -89,6 +95,9 @@ const useStore = create((set, get) => ({
 
     showAbout: false,
     setShowAbout: (showAbout) => set({ showAbout }),
+
+    showAboutMobile: false,
+    setShowAboutMobile: (showAboutMobile) => set({ showAboutMobile }),
 
     showMenu: false,
     setShowMenu: (showMenu) => set({ showMenu }),

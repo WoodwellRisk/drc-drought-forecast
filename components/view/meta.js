@@ -13,7 +13,9 @@ const Meta = ({ title, description, card, url }) => {
     console.warn('a custom title should be used for search engine optimization')
   }
   const titleProp = title || 'Woodwell Risk'
-  const descriptionProp = description || 'Woodwell Risk drought forecast for the DRC'
+  const descriptionProp =
+    description ||
+    'Woodwell Risk data viewer'
   const cardProp = card || 'https://storage.googleapis.com/risk-maps/media/woodwell-risk.png'
   const urlProp = url || 'https://www.woodwellclimate.org/research-area/risk/'
 

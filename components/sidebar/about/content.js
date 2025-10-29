@@ -1,32 +1,38 @@
 import { useState } from 'react'
 import { Box, IconButton, Text } from 'theme-ui'
-import { Globe } from '@carbonplan/icons'
+import { Globe, Reset } from '@carbonplan/icons'
 import { Dimmer } from '@carbonplan/components'
 import InfoDemo from './info-demo'
 import GlobeDemo from './globe-demo'
-
-const sx = {
-  'container': {
-    mx: [3, 4, 5, 6],
-    pt: [1],
-    mt: 2,
-    pb: [2],
-    mb: [3],
-    fontSize: [2, 2, 2, 3],
-    // border: '1px solid',
-    // borderColor: 'blue',
-    width: 'fit-content',
-  },
-}
+// import ResetDemo from './reset-demo'
 
 const Content = () => {
   const [showGraticule, setShowGraticule] = useState(false)
   const toggleGraticule = () => setShowGraticule(!showGraticule)
 
+  const sx = {
+    'container': {
+      pb: [2],
+      mb: [3],
+      fontSize: [2, 2, 2, 3],
+      width: 'fit-content',
+    },
+    'heading': {
+      mt: [3],
+      mb: [4],
+      pr: [0, 5, 5, 6],
+      fontSize: [4, 4, 4, 5],
+      fontFamily: 'heading',
+      fontWeight: 'heading',
+      lineHeight: 'h3',
+      width: '100%',
+    }
+  }
+
   return (
     <>
       <Box sx={sx['container']} >
-        <Box as='h2' variant='styles.h4'>
+        <Box sx={sx['heading']}>
           <Text sx={{ textDecoration: 'underline' }}>How to use this site</Text>
         </Box>
 
@@ -34,7 +40,7 @@ const Content = () => {
           <Text sx={{ fontSize: 2 }}>
             You will find an <Text sx={{ bg: 'muted' }}>Info</Text> icon next to each variable's name. There, you will find
             additional information about what the variable is showing, how the data layer was created, and links to any additional
-            information if there are any. Clicking on the <Text sx={{ bg: 'muted' }}>Info</Text> icon reveals hidden dropdown text. You can try this with
+            information if there is any. Clicking on the <Text sx={{ bg: 'muted' }}>Info</Text> icon reveals hidden dropdown text. You can try this with
             the icon to the right.
             <InfoDemo>This is hidden dropdown text.</InfoDemo>
           </Text>
@@ -45,7 +51,6 @@ const Content = () => {
             Clicking the <Text sx={{ bg: 'muted' }}>Sun</Text> icon <Dimmer sx={{ color: 'primary', height: '18px', }} /> will change the website theme between light and dark modes.
           </Text>
         </Box>
-
 
         <Box sx={{ mt: 4 }}>
           <Text>
@@ -73,13 +78,19 @@ const Content = () => {
           <GlobeDemo showGraticule={showGraticule} />
         </Box>
 
-        {/* <Box as='h2' variant='styles.h4'>
-          <Text sx={{ textDecoration: 'underline' }}>Methods</Text>
+        <Box sx={{ mt: 4 }}>
+          <Text>
+            The <Text sx={{ bg: 'muted' }}>Reset</Text> icon resets the map extent to the original zoom and center.
+            Test this on the map by panning and zooming, then clicking on the <Reset sx={{ strokeWidth: 1, width: 15, height: 15 }} /> icon.
+          </Text>
         </Box>
-        <Box sx={{ mt: -2, }}>
-          <Text>...</Text>
-        </Box> */}
-
+        {/*         
+        {isWide && (
+          <Box sx={{ mt: 2, border: '1px solid', borderColor: 'primary', width: '100%', }}>
+            <ResetDemo isWide={isWide} />
+          </Box>
+        )} 
+        */}
       </Box>
     </>
   )
