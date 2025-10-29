@@ -78,7 +78,7 @@ const Map = ({ mobile }) => {
             color={theme.rawColors.primary}
             source={'https://storage.googleapis.com/drc-drought-forecast/vector/countries'}
             variable={'countries'}
-            width={showStatesOutline && zoom > 2.5 ? 1.75 : 1}
+            width={showStatesOutline && zoom > 2.5 ? 1.5 : 1}
           />
         )}
 
