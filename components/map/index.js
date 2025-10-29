@@ -3,6 +3,7 @@ import { useThemeUI, Box } from 'theme-ui'
 import { useThemedColormap } from '@carbonplan/colormaps'
 import { Map as MapContainer, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
 import { Dimmer } from '@carbonplan/components'
+import ForecastData from './forecast-data'
 import LayerOrder from './layer-order'
 import Ruler from './ruler'
 import Router from './router'
@@ -22,8 +23,8 @@ const Map = ({ mobile }) => {
   const variable = useStore((state) => state.variable)
   const band = useStore((state) => state.band)
   const bandArray = useStore((state) => state.bandArray)
-  const forecast = useStore((state) => state.forecast)
-  const forecastArray = useStore((state) => state.forecastArray)
+  const time = useStore((state) => state.time)
+  const dates = useStore((state) => state.dates)
   const clim = useStore((state) => state.clim)()
   const colormapName = useStore((state) => state.colormapName)()
   const colormap = useThemedColormap(colormapName, { count: 10 })
@@ -121,7 +122,7 @@ const Map = ({ mobile }) => {
           />
         )}
 
-        {showRegionPicker && (
+        {/* {showRegionPicker && (
           <RegionPicker
             color={theme.colors.primary}
             backgroundColor={theme.colors.background}
@@ -146,7 +147,17 @@ const Map = ({ mobile }) => {
             setData: handleRegionData,
             selector: { band: bandArray, forecast: forecastArray }
           }}
-        />
+        /> */}
+
+          <ForecastData
+            key={`time-${band}-${time}`}
+            id={'forecast'}
+            color={'#026440'}
+            primaryColor={theme.rawColors.primary}
+            borderColor={theme.rawColors.background}
+            source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
+            variable={'drc-drought'}
+          /> 
 
         <Ruler mobile={mobile} />
 

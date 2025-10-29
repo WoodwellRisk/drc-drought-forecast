@@ -10,8 +10,8 @@ import useStore from '../store/index'
 function Layers() {
   const band = useStore((state) => state.band)
   const setBand = useStore((state) => state.setBand)
-  const setForecast = useStore((state) => state.setForecast)
-  const forecastArray = useStore((state) => state.forecastArray)
+  const setTime = useStore((state) => state.setTime)
+  const dates = useStore((state) => state.dates)
   const colormapName = useStore((state) => state.colormapName)()
   const colormap = useThemedColormap(colormapName, { count: 10 })
   const clim = useStore((state) => state.clim)()
@@ -73,7 +73,7 @@ function Layers() {
   }, [sliderIndex])
 
   useEffect(() => {
-    setForecast(forecastArray[sliderIndex])
+    setTime(dates[sliderIndex])
   }, [sliderIndex])
 
   return (
@@ -200,7 +200,7 @@ function Layers() {
 
             }}
           >
-            Forecast: {forecastArray[sliderIndex]}
+            Time: {dates[sliderIndex]}
           </Box>
         </Box>
 

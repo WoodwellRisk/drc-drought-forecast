@@ -29,12 +29,12 @@ const useStore = create((set, get) => ({
     display: true,
     setDisplay: (display) => set({ display }),
 
-    time: '2024-09-01',
-    setTime: (time) => set({time}),
+    // time: '2024-09-01',
+    // setTime: (time) => set({time}),
 
     // okay, so the issue might be that we are trying to read in a datetime64[ns] object, when we want a string
-    forecast: '2024-09-01',
-    forecastArray: [
+    time: '2024-09-01',
+    dates: [
         '2024-09-01',
         '2024-10-01',
         '2024-11-01',
@@ -42,7 +42,7 @@ const useStore = create((set, get) => ({
         '2025-01-01', 
         '2025-02-01',
     ],
-    setForecast: (forecast) => set({forecast}),
+    setTime: (time) => set({time}),
 
     month: 1,
     setMonth: (month) => set({ month }),
