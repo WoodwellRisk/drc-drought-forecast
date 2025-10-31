@@ -23,7 +23,7 @@ function rgbArrayToHex(rgbArray) {
     });
 }
 
-const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom = null, maxZoom = null }) => {
+const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, time, minZoom = null, maxZoom = null }) => {
 
     const { map } = useMapbox()
     const removed = useRef(false)
@@ -34,9 +34,9 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom
     const colormapName = useStore((state) => state.colormapName)()
     const colormap = useThemedColormap(colormapName, { count: 10 })
     const colors = rgbArrayToHex(colormap)
-
-    const band = useStore((state) => state.band)
-    const time = useStore((state) => state.time)
+    const borderWidth = 0.5
+    const zoom = useStore((state) => state.zoom)
+    const zoomChange = 4.5
 
     useEffect(() => {
         map.on('remove', () => {
@@ -49,10 +49,10 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom
         const { current: sourceId } = sourceIdRef
         if (!map.getSource(sourceId)) {
             map.addSource(sourceId, {
-                // type: 'vector',
-                // tiles: [`${source}/drc-drought/{z}/{x}/{y}.pbf`],
-                type: 'geojson',
-                data: `${source}/drc-drought.geojson`,
+                type: 'vector',
+                tiles: [`${source}/drought/{z}/{x}/{y}.pbf`],
+                // type: 'geojson',
+                // data: `${source}/drc-drought.geojson`,
             })
             if (minZoom) {
                 map.getSource(sourceId).minzoom = minZoom
@@ -75,10 +75,10 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom
                 type: 'circle',
                 source: sourceId,
                 // 'source-layer': variable,
+                'source-layer': 'drought',
                 layout: { visibility: 'visible' },
                 paint: {
                     // 'circle-color': ['get', 'drought_color'],
-                    // 'circle-color': color,
                     // 'circle-color': [
                     //     'interpolate',
                     //     ['linear'],
@@ -101,31 +101,27 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom
                         colors[9] // else greater than 90
                     ],
                     'circle-opacity': 1.0,
-                    // 2 is a good size while zoomed out, not while zooming in
-                    // 'circle-radius': 3,
                     'circle-radius': [
                         // https://docs.mapbox.com/style-spec/reference/expressions/
                         'interpolate', ['linear'], ['zoom'],
-                        // zoom is 5 (or less) -> circle radius will be 1px
-                        4.2, 2, // zoom is 5 (or less) -> circle radius will be 1px
-                        5, 3, // zoom is 10 (or greater) -> circle radius will be 5px
-                        6, 4,
-                        7, 6,
-                        8, 8,
-                    ]
+                        3, 2,
+                        4, 3,
+                        6, 5,
+                        7, 8,
+                        8, 9,
+                    ],
+                    // https://docs.mapbox.com/help/glossary/layout-paint-property/
+                    'circle-stroke-color': borderColor,
+                    'circle-stroke-width': 0,
                 },
 
-                // https://docs.mapbox.com/help/glossary/layout-paint-property/
-                // 'circle-stroke-color': borderColor,
-                // 'circle-stroke-width': 10,
-
-                // 'filter': ['==', 'band', band]
                 'filter': [
                     'all',
                     ['==', 'band', band],
                     ['==', 'time', time]
                 ],
             })
+
         }
 
         return () => {
@@ -137,9 +133,37 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, minZoom
         }
     }, [])
 
-    // useEffect(() => {
-    //     updatePaintProperty(map, layerIdRef, 'circle-color', color)
-    // }, [color])
+    useEffect(() => {
+        map.setFilter(layerIdRef.current, ['all', ['==', 'band', band], ['==', 'time', time]])
+    }, [band, time])
+
+    useEffect(() => {
+        if (zoom < zoomChange) {
+            updatePaintProperty(map, layerIdRef, 'circle-stroke-width', 0)
+        } else {
+            let layers = map.getStyle().layers
+            let forecast = layers.filter((layer) => layer.source == 'forecast')[0]
+            if (forecast.paint['circle-stroke-color'] != borderWidth) {
+                updatePaintProperty(map, layerIdRef, 'circle-stroke-width', borderWidth)
+            }
+
+        }
+    }, [zoom])
+
+
+    // https://docs.mapbox.com/mapbox-gl-js/example/popup-on-hover/
+    // https://docs.mapbox.com/mapbox-gl-js/example/queryrenderedfeatures/
+    // we could also make an on click event to get the time series for the charts box
+    map.on('mousemove', layerIdRef.current, (event) => {
+        map.getCanvas().style.cursor = 'cell';
+
+        let coordinates = [event.lngLat.lng, event.lngLat.lat]
+        // console.log(coordinates)
+    });
+
+    map.on('mouseleave', layerIdRef.current, (event) => {
+        map.getCanvas().style.cursor = 'default';
+    });
 
     return null
 }

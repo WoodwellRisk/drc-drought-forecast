@@ -16,6 +16,8 @@ const Map = ({ mobile }) => {
   const container = useRef(null)
   const center = useStore((state) => state.center)
   const zoom = useStore((state) => state.zoom)
+  const minZoom = useStore((state) => state.minZoom)
+  const maxZoom = useStore((state) => state.maxZoom)
   const bounds = useStore((state) => state.bounds)
 
   const display = useStore((state) => state.display)
@@ -63,7 +65,8 @@ const Map = ({ mobile }) => {
 
   return (
     <Box ref={container} sx={{ flexBasis: '100%', 'canvas.mapboxgl-canvas:focus': { outline: 'none', }, }} >
-      <MapContainer zoom={zoom} center={center} maxBounds={bounds} >
+      {/* <MapContainer zoom={zoom} center={center} maxBounds={bounds} > */}
+      <MapContainer zoom={zoom} center={center} maxBounds={bounds} minZoom={1} maxZoom={maxZoom} >
         {showOceanMask && (
           <Fill
             id={'ocean'}
@@ -112,6 +115,23 @@ const Map = ({ mobile }) => {
           />
         )}
 
+        {/* 
+        this data needs to be clipped by land
+        then i can look into removing the border of points around the extent
+      */}
+        <ForecastData
+          key={`time-${band}`}
+          id={'forecast'}
+          band={band}
+          time={time}
+          color={'#026440'}
+          primaryColor={theme.rawColors.primary}
+          // borderColor={theme.rawColors.background}
+          borderColor={theme.rawColors.secondary}
+          source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
+          variable={'drc-drought'}
+        />
+
         {showLandOutline && (
           <Line
             id={'land'}
@@ -142,22 +162,20 @@ const Map = ({ mobile }) => {
           mode={'texture'}
           source={`https://storage.googleapis.com/drc-drought-forecast/zarr/drc-drought.zarr`}
           variable={variable}
-          selector={{ band, forecast }}
+          selector={{ band, time }}
           regionOptions={{
             setData: handleRegionData,
-            selector: { band: bandArray, forecast: forecastArray }
+            selector: { band: bandArray, time: dates }
           }}
         /> */}
 
-          <ForecastData
-            key={`time-${band}-${time}`}
-            id={'forecast'}
-            color={'#026440'}
-            primaryColor={theme.rawColors.primary}
-            borderColor={theme.rawColors.background}
-            source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
-            variable={'drc-drought'}
-          /> 
+        {/* 
+          Could look at comparing the maps directly instead of toggling between them:
+            - https://github.com/maplibre/maplibre-gl-compare
+          Could also try and clip output by geometry masks: 
+            - https://turfjs.org/docs/api/pointsWithinPolygon
+            - https://turfjs.org/docs/api/booleanIntersects
+        */}
 
         <Ruler mobile={mobile} />
 

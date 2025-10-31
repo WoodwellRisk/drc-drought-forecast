@@ -134,6 +134,7 @@ function Layers() {
         <Box sx={{ ...sx.label, mt: [4] }}>
           <Box sx={sx.label}>Lead time (months)</Box>
           <Slider
+            id={'time-slider'}
             sx={{ mt: [3], mb: [3] }}
             value={sliderIndex}
             onChange={(e) => setSliderIndex(e.target.value)}

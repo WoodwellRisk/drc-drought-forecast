@@ -2,19 +2,24 @@ import { create } from 'zustand'
 
 const useStore = create((set, get) => ({
     // map container state
-    zoom: 4.20,
+    zoom: 3.75,
     setZoom: (zoom) => set({ zoom }),
+
+    minZoom: 1,
+    maxZoom: 7,
 
     center: [20.50, -3.33],
     setCenter: (center) => set({ center }),
 
-    maxZoom: 8,
-
     // https://github.com/mapbox/mapbox-gl-js/blob/2b6915c8004a5b759338f3a7d92fb2882db9dd5c/src/geo/lng_lat.js#L192-L201
     // https://docs.mapbox.com/mapbox-gl-js/example/restrict-bounds/
+    // bounds: [
+    //     [7.2, -13.8], // southwest
+    //     [33.8, 8.8] // northeast
+    // ],
     bounds: [
-        [7.2, -13.8], // southwest
-        [33.8, 8.8] // northeast
+        [-31.0, -41.5], // southwest
+        [74.0, 45.0] // northeast
     ],
 
     variable: 'drought',
