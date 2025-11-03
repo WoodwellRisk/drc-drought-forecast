@@ -129,7 +129,7 @@ const Map = ({ mobile }) => {
           // borderColor={theme.rawColors.background}
           borderColor={theme.rawColors.secondary}
           source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
-          variable={'drc-drought'}
+          variable={'drought'}
         />
 
         {showLandOutline && (
