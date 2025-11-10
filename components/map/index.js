@@ -26,6 +26,7 @@ const Map = ({ mobile }) => {
   const band = useStore((state) => state.band)
   const bandArray = useStore((state) => state.bandArray)
   const time = useStore((state) => state.time)
+  const forecast = useStore((state) => state.forecast)
   const dates = useStore((state) => state.dates)
   const clim = useStore((state) => state.clim)()
   const colormapName = useStore((state) => state.colormapName)()
@@ -141,33 +142,6 @@ const Map = ({ mobile }) => {
             width={1}
           />
         )}
-
-        {/* {showRegionPicker && (
-          <RegionPicker
-            color={theme.colors.primary}
-            backgroundColor={theme.colors.background}
-            fontFamily={theme.fonts.mono}
-            fontSize={'14px'}
-            minRadius={1}
-            maxRadius={1500}
-          />
-        )}
-
-        <Raster
-          key={variable}
-          colormap={colormap}
-          clim={clim}
-          display={display}
-          opacity={opacity}
-          mode={'texture'}
-          source={`https://storage.googleapis.com/drc-drought-forecast/zarr/drc-drought.zarr`}
-          variable={variable}
-          selector={{ band, time }}
-          regionOptions={{
-            setData: handleRegionData,
-            selector: { band: bandArray, time: dates }
-          }}
-        /> */}
 
         {/* 
           Could look at comparing the maps directly instead of toggling between them:

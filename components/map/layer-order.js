@@ -27,33 +27,53 @@ const LayerOrder = () => {
 
     // there is something wrong with this logic, where the forecast layer 
     // is put above the land, ocean, states, and countries layers
-    useEffect(() => {
-        if (showCountriesOutline || showStatesOutline) {
-            let layers = map.getStyle().layers;
+    // useEffect(() => {
+    //     if (showCountriesOutline || showStatesOutline) {
+    //         let layers = map.getStyle().layers;
 
-            let states = layers.filter((layer) => layer.source == 'states')[0]
-            let countries = layers.filter((layer) => layer.source == 'countries')[0]
-            let forecast = layers.filter((layer) => layer.source == 'forecast')[0]
+    //         let states = layers.filter((layer) => layer.source == 'states')[0]
+    //         let countries = layers.filter((layer) => layer.source == 'countries')[0]
+    //         let forecast = layers.filter((layer) => layer.source == 'forecast')[0]
 
-            if (forecast && showStatesOutline) {
-                map.moveLayer(forecast.id, states.id)
-            }
+    //         if (forecast && showStatesOutline) {
+    //             map.moveLayer(forecast.id, states.id)
+    //         }
 
-            if (forecast && showCountriesOutline) {
-                map.moveLayer(forecast.id, countries.id)
-            }
-        }
-    }, [showStatesOutline, showCountriesOutline])
+    //         if (forecast && showCountriesOutline) {
+    //             map.moveLayer(forecast.id, countries.id)
+    //         }
+    //     }
+    // }, [showStatesOutline, showCountriesOutline])
 
     useEffect(() => {
         let layers = map.getStyle().layers;
 
         let land = layers.filter((layer) => layer.source == 'land')[0]
         let ocean = layers.filter((layer) => layer.source == 'ocean')[0]
+
+        let states = layers.filter((layer) => layer.source == 'states')[0]
+        let countries = layers.filter((layer) => layer.source == 'countries')[0]
+
         let forecast = layers.filter((layer) => layer.source == 'forecast')[0]
 
         map.moveLayer(forecast.id, ocean.id)
-        map.moveLayer(ocean.id, land.id)
+        map.moveLayer(forecast.id, land.id)
+
+        if(states) {
+            map.moveLayer(forecast.id, states.id)
+        }
+
+        if(countries) {
+            map.moveLayer(forecast.id, countries.id)
+        }
+
+        if(states && countries) {
+            map.moveLayer(states.id, countries.id)
+        }
+
+        // this hides the points on or outside the land border
+        // map.moveLayer(ocean.id, land.id)
+
     }, [band, time])
 
     return null

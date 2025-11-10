@@ -38,6 +38,7 @@ const useStore = create((set, get) => ({
     // setTime: (time) => set({time}),
 
     // okay, so the issue might be that we are trying to read in a datetime64[ns] object, when we want a string
+    forecast: '2024-09-01',
     time: '2024-09-01',
     dates: [
         '2024-09-01',
@@ -73,6 +74,12 @@ const useStore = create((set, get) => ({
 
     regionData: { loading: true },
     setRegionData: (regionData) => set({ regionData }),
+
+    showCharts: false,
+    setShowCharts: (showCharts) => set({ showCharts }),
+
+    plotData: {},
+    setPlotData: (plotData) => set({ plotData }),
 
     regionLoadingData: true,
     setRegionDataLoading: (regionLoadingData) => set({ regionLoadingData }),

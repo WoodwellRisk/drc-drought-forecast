@@ -6,8 +6,9 @@ import useStore from '../../store/index'
 
 const TimeSeries = ({ data }) => {
     const band = useStore((state) => state.band)
-    const forecastArray = useStore((state) => state.forecastArray)
-    const xLabels = forecastArray.map(f => {
+    // const forecastArray = useStore((state) => state.forecastArray)
+    const dates = useStore((state) => state.dates)
+    const xLabels = dates.map(f => {
         let dateString = new Date(f).toISOString().split("-")
         return `${dateString[1]}/${dateString[0].slice(-2)}`
     })
@@ -28,6 +29,11 @@ const TimeSeries = ({ data }) => {
 
     const yTicks = clim
     const yLabel = (band == 'percentile' || band == 'agreement' || band == 'percent') ? 'Percent (%)' : 'Precipitation (mm)'
+
+    console.log('Here!')
+    console.log(data)
+    console.log(data['percentile'].map((d, idx) => [idx, d[1]]))
+    console.log()
     
     return (
         <>

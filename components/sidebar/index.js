@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Box, Text } from 'theme-ui'
 import { SidebarDivider } from '@carbonplan/layouts'
 
@@ -12,8 +13,9 @@ import Footer from './footer'
 import useStore from '../store/index'
 
 const Sidebar = () => {
-  const showRegionPicker = useStore((state) => state.showRegionPicker)
-  const setShowRegionPicker = useStore((state) => state.setShowRegionPicker)
+  const showCharts = useStore((state) => state.showCharts)
+  const setShowCharts = useStore((state) => state.setShowCharts)
+  const setPlotData = useStore((state) => state.setPlotData)
   const showAbout = useStore((state) => state.showAbout)
   const setShowAbout = useStore((state) => state.setShowAbout)
   const showMenu = useStore((state) => state.showMenu)
@@ -75,9 +77,15 @@ const Sidebar = () => {
       mb: [5],
       mx: 'auto',
       width: '100%',
-      height: '215px',
+      height: '250px',
     },
   }
+
+  useEffect(() => {
+    if(!showCharts) {
+      setPlotData({})
+    }
+  }, [showCharts])
 
   return (
     <Box sx={sx['sidebar-container']}>
@@ -94,12 +102,10 @@ const Sidebar = () => {
         <Layers />
         <SidebarDivider sx={{ width: '100%', my: 4 }} />
 
-        <ExpandingSection label='Charts' expanded={showRegionPicker} setExpanded={setShowRegionPicker}>
-          {showRegionPicker && (
-            <Box sx={{ ...sx.charts }}>
-              <Charts />
-            </Box>
-          )}
+        <ExpandingSection label='Charts' expanded={showCharts} setExpanded={setShowCharts}>
+          <Box sx={{ ...sx.charts }}>
+            <Charts />
+          </Box>
         </ExpandingSection>
         <SidebarDivider sx={{ width: '100%', my: 4 }} />
 

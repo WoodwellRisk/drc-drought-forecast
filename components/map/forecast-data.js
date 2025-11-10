@@ -37,6 +37,8 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
     const borderWidth = 0.5
     const zoom = useStore((state) => state.zoom)
     const zoomChange = 4.5
+    const dates = useStore((state) => state.dates)
+    const setPlotData = useStore((state) => state.setPlotData)
 
     const [filterCoordinates, setFilterCoordinates] = useState([])
 
@@ -58,12 +60,15 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
             console.log(features)
             // sometimes the features are repeated at the boundaries of tiles, so we need to only keep the first 6 of each
             // https://github.com/mapbox/mapbox-gl-js/issues/3147
-            let percentiles = features.filter((feature) => feature.properties.band == 'percentile').map((feature) => [feature.properties.time, feature.properties.drought]).slice(0, 6)
+            let percentile = features.filter((feature) => feature.properties.band == 'percentile').map((feature) => [feature.properties.time, feature.properties.drought]).slice(0, 6)
             let agreement = features.filter((feature) => feature.properties.band == 'agreement').map((feature) => [feature.properties.time, feature.properties.drought]).slice(0, 6)
-            console.log(percentiles)
-            console.log(agreement)
-            console.log()
-
+            setPlotData({
+                'coordinates': filterCoordinates,
+                'percentile': percentile,
+                'agreement': agreement
+                // 'percentile': dates.map((date, index) => [date, percentile[index]]),
+                // 'agreement': dates.map((date, index) => [date, agreement[index]])
+            })
         }
     }, [filterCoordinates])
 
@@ -194,36 +199,9 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
         const roundToNearest025 = (num) => {
             return Math.round(num * 4) / 4;
         }
-
-        // const features = map.queryRenderedFeatures(event.point, { layers: [layerIdRef.current] });
-        // if (features.length) {
-            
-        //     console.log(features)
-        //     // the x, y coordinates that we get from the map are not always the same 
-        //     // as those we need to query the vector data
-        //     // let coordinates = features[0].geometry.coordinates.slice().map(xy => roundToNearest025(xy));
-        //     // console.log(coordinates);
-
-        //     // const filtered = features.filter((feature) => feature.geometry.coordinates == coordinates);
-        //     // console.log(filtered)
-        //     // console.log()
-
-        // }
-
+        
         let coordinates = [event.lngLat.lng, event.lngLat.lat].map(xy => roundToNearest025(xy))
         setFilterCoordinates(coordinates)
-        // console.log(coordinates)
-
-        // let timeseries = map.querySourceFeatures('forecast', {
-        //     sourceLayer: 'drought',
-        //     filter: [
-        //         'all',
-        //         ['==', 'band', band]
-        //     ],
-        // });
-        // console.log(timeseries);
-        // let features = map.queryRenderedFeatures(event.point);
-        // console.log(features)
     })
 
     map.on('mouseleave', layerIdRef.current, (event) => {
