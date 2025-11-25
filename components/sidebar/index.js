@@ -8,7 +8,6 @@ import Layers from './layers'
 import Charts from './charts/index'
 import ExpandingSection from './expanding-section'
 import Overlays from './overlays'
-import Footer from './footer'
 
 import useStore from '../store/index'
 
@@ -82,7 +81,7 @@ const Sidebar = () => {
   }
 
   useEffect(() => {
-    if(!showCharts) {
+    if (!showCharts) {
       setPlotData({})
     }
   }, [showCharts])
@@ -113,10 +112,7 @@ const Sidebar = () => {
           <Overlays />
         </ExpandingSection>
         <SidebarDivider sx={{ width: '100%', mt: 4 }} />
-
-        <Footer />
       </Box>
-
     </Box>
   )
 }

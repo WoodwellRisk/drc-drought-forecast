@@ -4,7 +4,9 @@ import TimeSeries from './timeseries'
 import useStore from '../../store/index'
 
 const StatsDisplay = ({ data }) => {
-  const band = useStore((state) => state.band)
+  const variable = useStore((state) => state.variable)
+  const confidence = useStore((state) => state.confidence)
+  const band = useStore((state) => state.band)()
   const sliderIndex = useStore((state) => state.sliderIndex)
 
   if (!data || !data[band]) {
@@ -30,12 +32,12 @@ const StatsDisplay = ({ data }) => {
   }
 
   let result;
-  let value = data[band][sliderIndex][1]
+  let value = data[band][sliderIndex]
   
   if(data == {}) {
     result = 'no data in region'
   } else {
-    result = `${band == 'percentile' ? 'Percentile' : 'Agreement'}: ${value.toFixed(2)}${band == 'percentile' || band == 'agreement' ? '%' : 'mm'}`
+    result = `${variable == 'percent' ? 'Percentile' : 'Precipitation'}: ${value.toFixed(2)}${band == 'percentile' || band == 'agreement' ? '%' : 'mm'}`
   }
 
   return (

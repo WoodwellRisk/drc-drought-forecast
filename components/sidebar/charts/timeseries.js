@@ -1,11 +1,13 @@
 import { Box, Text } from 'theme-ui'
-import { AxisLabel, Chart, Circle, Grid, Line, Plot, Ticks, TickLabels } from '@carbonplan/charts'
+import { Area, AxisLabel, Chart, Circle, Grid, Line, Plot, Ticks, TickLabels } from '@carbonplan/charts'
 
 import StraightLine from '../icons/straight-line'
 import useStore from '../../store/index'
 
 const TimeSeries = ({ data }) => {
-    const band = useStore((state) => state.band)
+    const variable = useStore((state) => state.variable)
+    const confidence = useStore((state) => state.confidence)
+    const band = useStore((state) => state.band)()
     // const forecastArray = useStore((state) => state.forecastArray)
     const dates = useStore((state) => state.dates)
     const xLabels = dates.map(f => {
@@ -28,12 +30,22 @@ const TimeSeries = ({ data }) => {
     }
 
     const yTicks = clim
-    const yLabel = (band == 'percentile' || band == 'agreement' || band == 'percent') ? 'Percent (%)' : 'Precipitation (mm)'
+    const yLabel = (variable == 'percent') ? 'Percent (%)' : 'Precip (mm)'
 
-    console.log('Here!')
-    console.log(data)
-    console.log(data['percentile'].map((d, idx) => [idx, d[1]]))
-    console.log()
+    // get median and high confidence bands
+    let percentMediumConfidence = [0, 1, 2, 3, 4, 5].map((value) => {
+        return [value, data['percent_20'][value], data['percent_80'][value]]
+    })
+    let percentHighConfidence = [0, 1, 2, 3, 4, 5].map((value) => {
+        return [value, data['percent_5'][value], data['percent_95'][value]]
+    })
+
+    let precipMediumConfidence = [0, 1, 2, 3, 4, 5].map((value) => {
+        return [value, data['precip_20'][value], data['precip_80'][value]]
+    })
+    let precipHighConfidence = [0, 1, 2, 3, 4, 5].map((value) => {
+        return [value, data['precip_5'][value], data['precip_95'][value]]
+    })
     
     return (
         <>
@@ -60,16 +72,28 @@ const TimeSeries = ({ data }) => {
                             }}
                         />
 
-                        <Line data={data['percentile'].map((d, idx) => [idx, d[1]])} width={2} color='primary' />
+                        <Area
+                            data={percentMediumConfidence}
+                            color='primary'
+                            opacity={0.2}
+                        />
 
-                        <Line data={data['agreement'].map((d, idx) => [idx, d[1]])} width={2} color='secondary' />
+                        <Area
+                            data={precipMediumConfidence}
+                            color='blue'
+                            opacity={0.2}
+                        />
+
+                        <Line data={data['percent_50'].map((d, idx) => [idx, d])} width={2} color='primary' />
+
+                        <Line data={data['precip_50'].map((d, idx) => [idx, d])} width={2} color='blue' />
 
                         {/* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every */}
-                        {!data[band].every((value) => isNaN(value[1])) && (
+                        {!data[band].every((value) => isNaN(value)) && (
                             <Circle
                                 x={sliderIndex}
-                                y={data[band][sliderIndex][1]}
-                                color={band == 'percentile' ? 'primary' : 'secondary'}
+                                y={data[`${variable}_50`][sliderIndex]}
+                                color={variable == 'percent' ? 'primary' : 'blue'}
                                 size={14}
                             />
                         )}
@@ -83,8 +107,8 @@ const TimeSeries = ({ data }) => {
                         <Text sx={{ml: 2, color: 'primary', fontSize: 13}}>Percentile</Text>
                     </Box>
                     <Box>
-                        <StraightLine sx={{color: 'secondary'}} />
-                        <Text sx={{ml: 2, color: 'secondary', fontSize: 13}}>Agreement</Text>
+                        <StraightLine sx={{color: 'blue'}} />
+                        <Text sx={{ml: 2, color: 'blue', fontSize: 13}}>Precipitation</Text>
                     </Box>
                 </Box>
             </Box>

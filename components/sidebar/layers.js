@@ -1,15 +1,16 @@
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Box } from 'theme-ui'
 import { useThemedColormap } from '@carbonplan/colormaps'
 import { Colorbar, Filter, Slider } from '@carbonplan/components'
-import { SidebarDivider } from '@carbonplan/layouts'
 import Info from './info'
 
 import useStore from '../store/index'
 
 function Layers() {
-  const band = useStore((state) => state.band)
-  const setBand = useStore((state) => state.setBand)
+  const variable = useStore((state) => state.variable)
+  const setVariable = useStore((state) => state.setVariable)
+  const confidenceArray = useStore((state) => state.confidenceArray)
+  const setConfidence = useStore((state) => state.setConfidence)
   const setTime = useStore((state) => state.setTime)
   const dates = useStore((state) => state.dates)
   const colormapName = useStore((state) => state.colormapName)()
@@ -19,12 +20,14 @@ function Layers() {
   const setSliderIndex = useStore((state) => state.setSliderIndex)
   const setSliding = useStore((state) => state.setSliding)
 
+  const varTitle = useStore((state) => state.varTitle)()
+  const varDescription = useStore((state) => state.varDescription)()
   const varTags = useStore((state) => state.varTags)
   const setVarTags = useStore((state) => state.setVarTags)
   const varTagLabels = useStore((state) => state.varTagLabels)
-  const varTitle = useStore((state) => state.varTitle)()
-  const varDescription = useStore((state) => state.varDescription)()
-  const defaultColors = useStore((state) => state.defaultColors)
+  const confTags = useStore((state) => state.confTags)
+  const setConfTags = useStore((state) => state.setConfTags)
+  const confTagLabels = useStore((state) => state.confTagLabels)
   const defaultLabels = useStore((state) => state.defaultLabels)
   const defaultUnits = useStore((state) => state.defaultUnits)
 
@@ -57,10 +60,17 @@ function Layers() {
     }
   }
 
-  const handleBandChange = useCallback((event) => {
-    let band = event.target.innerHTML == 'Agreement' ? 'agreement' : event.target.innerHTML == 'Percentile' ? 'percentile' : null
-    if (band != null) {
-      setBand(band)
+  const handleVariableChange = useCallback((event) => {
+    let variable = event.target.innerHTML == 'Percentile' ? 'percent' : event.target.innerHTML == 'Precipitation' ? 'precip' : null
+    if (variable != null) {
+      setVariable(variable)
+    }
+  })
+
+  const handleConfidenceChange = useCallback((event) => {
+    let confidence = String(event.target.innerHTML).replace('%', '')
+    if (confidenceArray.includes(confidence)) {
+      setConfidence(confidence)
     }
   })
 
@@ -82,11 +92,11 @@ function Layers() {
         <Box sx={{ mt: -3 }} className='var-container'>
           <Box as='h2' variant='styles.h4' className='var-title'>
             Layers <Info>
-              Select either percentile or agreement.
+              Select either percentile or precipitation.
             </Info>
           </Box>
 
-          <Box className='var-layers'>
+          <Box className='variable-layers'>
             <Filter
               sx={{
                 mr: [3],
@@ -95,17 +105,13 @@ function Layers() {
               values={varTags}
               labels={varTagLabels}
               setValues={setVarTags}
-              colors={defaultColors}
+              // colors={defaultColors}
               multiSelect={false}
-              onClick={handleBandChange}
+              onClick={handleVariableChange}
             />
           </Box>
-        </Box>
-      </Box>
-      <SidebarDivider sx={{ width: '100%', my: 4 }} />
 
-      <Box sx={sx.group}>
-        <Box as='h2' variant='styles.h4' className='var-subtitle'>
+          {/* <Box as='h2' variant='styles.h4' className='var-subtitle'>
           {varTitle}
           <Info>
             <Box className='layer-description' sx={sx.data_description}>
@@ -114,98 +120,115 @@ function Layers() {
               </Box>
             </Box>
           </Info>
-        </Box>
+        </Box> */}
 
-        <Box sx={{ ...sx.label, }}>
-          <Colorbar
-            sx={{ width: '250px', display: 'inline-block', flexShrink: 1, }}
-            sxClim={{ fontSize: [1, 1, 1, 2], pt: [1] }}
-            width='100%'
-            colormap={colormap}
-            label={defaultLabels[band]}
-            units={defaultUnits[band]}
-            clim={[clim[0].toFixed(2), clim[1].toFixed(2)]}
-            horizontal
-            bottom
-            discrete
-          />
-        </Box>
-
-        <Box sx={{ ...sx.label, mt: [4] }}>
-          <Box sx={sx.label}>Lead time (months)</Box>
-          <Slider
-            id={'time-slider'}
-            sx={{ mt: [3], mb: [3] }}
-            value={sliderIndex}
-            onChange={(e) => setSliderIndex(e.target.value)}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            min={0}
-            max={5}
-            step={1}
-          />
-
-          <Box
-            sx={{
-              textAlign: 'center',
-            }}
-          >
-            <Box
+          <Box className='confidence-layers'>
+            <Filter
               sx={{
-                fontFamily: 'mono',
-                letterSpacing: 'mono',
-                fontSize: [1],
-                display: 'inline-block',
-                float: 'left',
+                mr: [3],
+                mt: [4],
+                mb: [4],
               }}
-            >
-              0
-            </Box>
+              values={confTags}
+              labels={confTagLabels}
+              setValues={setConfTags}
+              multiSelect={false}
+              onClick={handleConfidenceChange}
+            />
+          </Box>
 
-            <Box
-              sx={{
-                fontFamily: 'mono',
-                letterSpacing: 'mono',
-                display: 'inline-block',
-                ml: 'auto',
-                mr: 'auto',
-                color: 'secondary',
-                transition: '0.2s',
-                fontSize: [1],
-              }}
-            >
-              {sliderIndex}
-            </Box>
+          <Box sx={{ ...sx.label, }}>
+            <Colorbar
+              sx={{ width: '250px', display: 'inline-block', flexShrink: 1, }}
+              sxClim={{ fontSize: [1, 1, 1, 2], pt: [1] }}
+              width='100%'
+              colormap={colormap}
+              label={defaultLabels[variable]}
+              units={defaultUnits[variable]}
+              clim={[clim[0].toFixed(2), clim[1].toFixed(2)]}
+              horizontal
+              bottom
+              discrete
+            />
+          </Box>
+
+          <Box sx={{ ...sx.label, mt: [4] }}>
+            <Box sx={sx.label}>Lead time (months)</Box>
+            <Slider
+              id={'time-slider'}
+              sx={{ mt: [3], mb: [3] }}
+              value={sliderIndex}
+              onChange={(e) => setSliderIndex(e.target.value)}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              min={0}
+              max={5}
+              step={1}
+            />
 
             <Box
               sx={{
-                fontFamily: 'mono',
-                letterSpacing: 'mono',
-                fontSize: [1],
-                float: 'right',
-                display: 'inline-block',
+                textAlign: 'center',
               }}
             >
-              5
+              <Box
+                sx={{
+                  fontFamily: 'mono',
+                  letterSpacing: 'mono',
+                  fontSize: [1],
+                  display: 'inline-block',
+                  float: 'left',
+                }}
+              >
+                0
+              </Box>
+
+              <Box
+                sx={{
+                  fontFamily: 'mono',
+                  letterSpacing: 'mono',
+                  display: 'inline-block',
+                  ml: 'auto',
+                  mr: 'auto',
+                  color: 'secondary',
+                  transition: '0.2s',
+                  fontSize: [1],
+                }}
+              >
+                {sliderIndex}
+              </Box>
+
+              <Box
+                sx={{
+                  fontFamily: 'mono',
+                  letterSpacing: 'mono',
+                  fontSize: [1],
+                  float: 'right',
+                  display: 'inline-block',
+                }}
+              >
+                5
+              </Box>
             </Box>
           </Box>
-        </Box>
 
-        <Box sx={{ ...sx.label, mt: [4] }}>
-          <Box
-            sx={{
-              mt: ['-1px'],
-              fontFamily: 'mono',
-              letterSpacing: 'mono',
-              textTransform: 'uppercase',
+          <Box sx={{ ...sx.label, mt: [4] }}>
+            <Box
+              sx={{
+                mt: ['-1px'],
+                fontFamily: 'mono',
+                letterSpacing: 'mono',
+                textTransform: 'uppercase',
 
-            }}
-          >
-            Time: {dates[sliderIndex]}
+              }}
+            >
+              Time: {dates[sliderIndex]}
+            </Box>
           </Box>
-        </Box>
 
+        </Box>
       </Box>
+
     </>
   )
 }

@@ -7,7 +7,7 @@ const LayerOrder = () => {
     const { map } = useMapbox()
     const showStatesOutline = useStore((state) => state.showStatesOutline)
     const showCountriesOutline = useStore((state) => state.showCountriesOutline)
-    const band = useStore((state) => state.band)
+    const band = useStore((state) => state.band)()
     const time = useStore((state) => state.time)
 
     // this method is only partly working

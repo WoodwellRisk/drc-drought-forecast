@@ -10,8 +10,11 @@ const Router = () => {
     const router = useRouter()
     const pathname = usePathname()
 
-    const band = useStore((state) => state.band)
-    const setBand = useStore((state) => state.setBand)
+    const variableArray = useStore((state) => state.variableArray)
+    const variable = useStore((state) => state.variable)
+    const setVariable = useStore((state) => state.setVariable)
+    const confidence = useStore((state) => state.confidence)
+    const setConfidence = useStore((state) => state.setConfidence)
     const setVarTags = useStore((state) => state.setVarTags)
 
     const verifySearchParams = useCallback((url) => {
@@ -27,10 +30,10 @@ const Router = () => {
         let initialLayer
         let tempLayer = url.searchParams.get("layer")
 
-        if (tempLayer != null && typeof tempLayer == 'string' && ['percentile', 'agreement'].includes(tempLayer)) {
+        if (tempLayer != null && typeof tempLayer == 'string' && variableArray.includes(tempLayer)) {
             initialLayer = tempLayer
         } else {
-            initialLayer = 'percentile'
+            initialLayer = 'percent'
         }
 
         url.searchParams.set('layer', initialLayer)
@@ -40,12 +43,12 @@ const Router = () => {
     useEffect(() => {
         const url = new URL(window.location)
         verifySearchParams(url)
-        let savedBand = getInitialLayer(url)
-        setBand(savedBand)
-        setVarTags({percentile: savedBand == 'percentile', agreement: savedBand == 'agreement'})
-        
-        if(!url.searchParams.has("layer")) {
-            url.searchParams.set("layer", savedBand)
+        let savedVariable = getInitialLayer(url)
+        setVariable(savedVariable)
+        setVarTags({ percent: savedVariable == 'percent', precip: savedVariable == 'precip' })
+
+        if (!url.searchParams.has("layer")) {
+            url.searchParams.set("layer", savedVariable)
         }
 
         router.replace(`${pathname}?${url.searchParams}`)
@@ -58,9 +61,9 @@ const Router = () => {
 
     useEffect(() => {
         const url = new URL(window.location)
-        url.searchParams.set('layer', band)
+        url.searchParams.set('layer', variable)
         router.push(`${pathname}?${url.searchParams}`)
-    }, [band])
+    }, [variable])
 
     return null
 }

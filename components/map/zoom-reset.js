@@ -14,9 +14,9 @@ const ZoomReset = ({ mobile = false }) => {
     const setCenter = useStore((state) => state.setCenter)
     const resetButton = useRef(null)
 
-    const initialZoom = 4.20
-    const initialLon = 20.50
-    const initialLat = -3.33
+    const initialZoom = 3.00
+    const initialLon = 28.50
+    const initialLat = -1.00
 
     map.on('zoom', () => {
         let zoom = map.getZoom().toFixed(2)

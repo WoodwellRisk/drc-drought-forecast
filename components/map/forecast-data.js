@@ -23,7 +23,15 @@ function rgbArrayToHex(rgbArray) {
     });
 }
 
-const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, time, minZoom = null, maxZoom = null }) => {
+// https://www.freecodecamp.org/news/javascript-range-create-an-array-of-numbers-with-the-from-method/
+const arrayRange = (start, stop, step) =>
+    Array.from(
+        { length: (stop - start) / step + 1 },
+        (value, index) => start + index * step
+    )
+
+
+const ForecastData = ({ id, source, band, time, borderColor, minZoom = null, maxZoom = null }) => {
 
     const { map } = useMapbox()
     const removed = useRef(false)
@@ -31,6 +39,7 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
     const sourceIdRef = useRef()
     const layerIdRef = useRef()
 
+    const clim = useStore((state) => state.clim)()
     const colormapName = useStore((state) => state.colormapName)()
     const colormap = useThemedColormap(colormapName, { count: 10 })
     const colors = rgbArrayToHex(colormap)
@@ -42,8 +51,19 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
 
     const [filterCoordinates, setFilterCoordinates] = useState([])
 
+    const min = clim[0]
+    const max = clim[1]
+    const range = max - min;
+    const nBins = 10
+    const binWidth = range / nBins;
+    const bins = arrayRange(min + binWidth, max, binWidth)
+
     useEffect(() => {
-        if(filterCoordinates.length != 0) {
+        console.log(map.getZoom())
+    }, [map.getZoom()])
+
+    useEffect(() => {
+        if (filterCoordinates.length != 0) {
             console.log(filterCoordinates)
 
             let features = map.querySourceFeatures('forecast', {
@@ -57,18 +77,47 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
                 ],
             });
 
-            console.log(features)
+            let plotData = {
+                'coordinates': filterCoordinates,
+                'time': [],
+                'percent_5': [],
+                'percent_20': [],
+                'percent_50': [],
+                'percent_80': [],
+                'percent_95': [],
+                'precip_5': [],
+                'precip_20': [],
+                'precip_50': [],
+                'precip_80': [],
+                'precip_95': [],
+            }
+
+            features.forEach((feature) => {              
+                plotData['time'].push(feature.properties['time']),
+                
+                plotData['percent_5'].push(feature.properties['percent_5']),
+                plotData['percent_20'].push(feature.properties['percent_20']),
+                plotData['percent_50'].push(feature.properties['percent_50']),
+                plotData['percent_80'].push(feature.properties['percent_80']),
+                plotData['percent_95'].push(feature.properties['percent_95']),
+                
+                plotData['precip_5'].push(feature.properties['precip_5']),
+                plotData['precip_20'].push(feature.properties['precip_20']),
+                plotData['precip_50'].push(feature.properties['precip_50']),
+                plotData['precip_80'].push(feature.properties['precip_80']),
+                plotData['precip_95'].push(feature.properties['precip_95'])
+            })
+
             // sometimes the features are repeated at the boundaries of tiles, so we need to only keep the first 6 of each
             // https://github.com/mapbox/mapbox-gl-js/issues/3147
-            let percentile = features.filter((feature) => feature.properties.band == 'percentile').map((feature) => [feature.properties.time, feature.properties.drought]).slice(0, 6)
-            let agreement = features.filter((feature) => feature.properties.band == 'agreement').map((feature) => [feature.properties.time, feature.properties.drought]).slice(0, 6)
-            setPlotData({
-                'coordinates': filterCoordinates,
-                'percentile': percentile,
-                'agreement': agreement
-                // 'percentile': dates.map((date, index) => [date, percentile[index]]),
-                // 'agreement': dates.map((date, index) => [date, agreement[index]])
-            })
+            Object.keys(plotData).forEach((key, index) => {
+                plotData[key] =  plotData[key].slice(0, 6)
+            });
+
+            // console.log(plotData)
+            // console.log()
+
+            setPlotData(plotData)
         }
     }, [filterCoordinates])
 
@@ -112,50 +161,44 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
                 'source-layer': 'drought',
                 layout: { visibility: 'visible' },
                 paint: {
-                    // 'circle-color': ['get', 'drought_color'],
-                    // 'circle-color': [
-                    //     'interpolate',
-                    //     ['linear'],
-                    //     ['get', 'drought'],
-                    //     0, '#95000c',
-                    //     50, '#ebebec',
-                    //     100, '#1e309f',
-                    //   ],
                     'circle-color': [
                         'case',
-                        ['<', ['get', 'drought'], 10], colors[0],
-                        ['all', ['>=', ['get', 'drought'], 10], ['<', ['get', 'drought'], 20]], colors[1],
-                        ['all', ['>=', ['get', 'drought'], 20], ['<', ['get', 'drought'], 30]], colors[2],
-                        ['all', ['>=', ['get', 'drought'], 30], ['<', ['get', 'drought'], 40]], colors[3],
-                        ['all', ['>=', ['get', 'drought'], 40], ['<', ['get', 'drought'], 50]], colors[4],
-                        ['all', ['>=', ['get', 'drought'], 50], ['<', ['get', 'drought'], 60]], colors[5],
-                        ['all', ['>=', ['get', 'drought'], 60], ['<', ['get', 'drought'], 70]], colors[6],
-                        ['all', ['>=', ['get', 'drought'], 70], ['<', ['get', 'drought'], 80]], colors[7],
-                        ['all', ['>=', ['get', 'drought'], 80], ['<', ['get', 'drought'], 90]], colors[8],
+                        ['<', ['get', band], bins[0]], colors[0],
+                        ['all', ['>=', ['get', band], bins[0]], ['<', ['get', band], bins[1]]], colors[1],
+                        ['all', ['>=', ['get', band], bins[1]], ['<', ['get', band], bins[2]]], colors[2],
+                        ['all', ['>=', ['get', band], bins[2]], ['<', ['get', band], bins[3]]], colors[3],
+                        ['all', ['>=', ['get', band], bins[3]], ['<', ['get', band], bins[4]]], colors[4],
+                        ['all', ['>=', ['get', band], bins[4]], ['<', ['get', band], bins[5]]], colors[5],
+                        ['all', ['>=', ['get', band], bins[5]], ['<', ['get', band], bins[6]]], colors[6],
+                        ['all', ['>=', ['get', band], bins[6]], ['<', ['get', band], bins[7]]], colors[7],
+                        ['all', ['>=', ['get', band], bins[7]], ['<', ['get', band], bins[8]]], colors[8],
                         colors[9] // else greater than 90
                     ],
                     'circle-opacity': 1.0,
                     'circle-radius': [
                         // https://docs.mapbox.com/style-spec/reference/expressions/
                         'interpolate', ['linear'], ['zoom'],
+                        2, 1,
                         3, 2,
                         4, 3,
-                        6, 5,
-                        7, 8,
-                        8, 9,
+                        zoomChange, ['get', 'agree'],
+                        5, ['^', 1.75, ['get', 'agree']],
+                        5.5, ['^', 1.825, ['get', 'agree']],
+                        6, ['^', 2, ['get', 'agree']],
+                        6.5, ['^', 2.25, ['get', 'agree']],
+                        7, ['^', 2.75, ['get', 'agree']],
+
                     ],
                     // https://docs.mapbox.com/help/glossary/layout-paint-property/
                     'circle-stroke-color': borderColor,
                     'circle-stroke-width': 0,
                 },
-
                 'filter': [
                     'all',
-                    ['==', 'band', band],
-                    ['==', 'time', time]
+                    ['==', 'time', time],
+                    ['>=', band, 0]
                 ],
             })
-
         }
 
         return () => {
@@ -170,7 +213,7 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
     useEffect(() => {
         const { current: layerId } = layerIdRef;
 
-        map.setFilter(layerId, ['all', ['==', 'band', band], ['==', 'time', time]])
+        map.setFilter(layerId, ['all', ['>=', band, 0], ['==', 'time', time]])
     }, [band, time])
 
     useEffect(() => {
@@ -199,7 +242,7 @@ const ForecastData = ({ id, source, variable, primaryColor, borderColor, band, t
         const roundToNearest025 = (num) => {
             return Math.round(num * 4) / 4;
         }
-        
+
         let coordinates = [event.lngLat.lng, event.lngLat.lat].map(xy => roundToNearest025(xy))
         setFilterCoordinates(coordinates)
     })

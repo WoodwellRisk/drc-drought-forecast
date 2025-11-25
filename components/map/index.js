@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useThemeUI, Box } from 'theme-ui'
-import { useThemedColormap } from '@carbonplan/colormaps'
-import { Map as MapContainer, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
+import { Map as MapContainer, Fill, Line } from '@carbonplan/maps'
 import { Dimmer } from '@carbonplan/components'
 import ForecastData from './forecast-data'
 import LayerOrder from './layer-order'
-import Ruler from './ruler'
 import Router from './router'
 import ZoomReset from './zoom-reset'
 
@@ -16,25 +14,14 @@ const Map = ({ mobile }) => {
   const container = useRef(null)
   const center = useStore((state) => state.center)
   const zoom = useStore((state) => state.zoom)
-  const minZoom = useStore((state) => state.minZoom)
   const maxZoom = useStore((state) => state.maxZoom)
   const bounds = useStore((state) => state.bounds)
 
-  const display = useStore((state) => state.display)
-  const opacity = useStore((state) => state.opacity)
   const variable = useStore((state) => state.variable)
-  const band = useStore((state) => state.band)
-  const bandArray = useStore((state) => state.bandArray)
+  const confidence = useStore((state) => state.confidence)
+  const band = useStore((state) => state.band)()
   const time = useStore((state) => state.time)
-  const forecast = useStore((state) => state.forecast)
-  const dates = useStore((state) => state.dates)
-  const clim = useStore((state) => state.clim)()
-  const colormapName = useStore((state) => state.colormapName)()
-  const colormap = useThemedColormap(colormapName, { count: 10 })
-  const setRegionData = useStore((state) => state.setRegionData)
-  const setRegionDataLoading = useStore((state) => state.setRegionDataLoading)
 
-  const showRegionPicker = useStore((state) => state.showRegionPicker)
   const showLandOutline = useStore((state) => state.showLandOutline)
   const showOceanMask = useStore((state) => state.showOceanMask)
   const showLakes = useStore((state) => state.showLakes)
@@ -51,22 +38,8 @@ const Map = ({ mobile }) => {
     },
   }
 
-  // this callback was modified from its source: https://github.com/carbonplan/oae-web/blob/3eff3fb99a24a024f6f9a8278add9233a31e853b/components/map.js#L93
-  const handleRegionData = useCallback(
-    (data) => {
-      if (data.value == null) {
-        setRegionDataLoading(true)
-      } else if (data.value) {
-        setRegionData(data.value)
-        setRegionDataLoading(false)
-      }
-    },
-    [setRegionData, setRegionDataLoading]
-  )
-
   return (
     <Box ref={container} sx={{ flexBasis: '100%', 'canvas.mapboxgl-canvas:focus': { outline: 'none', }, }} >
-      {/* <MapContainer zoom={zoom} center={center} maxBounds={bounds} > */}
       <MapContainer zoom={zoom} center={center} maxBounds={bounds} minZoom={1} maxZoom={maxZoom} >
         {showOceanMask && (
           <Fill
@@ -116,21 +89,15 @@ const Map = ({ mobile }) => {
           />
         )}
 
-        {/* 
-        this data needs to be clipped by land
-        then i can look into removing the border of points around the extent
-      */}
         <ForecastData
-          key={`time-${band}`}
+          key={`time-${variable}-${confidence}`}
           id={'forecast'}
+          source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
+          variable={variable}
+          confidence={confidence}
           band={band}
           time={time}
-          color={'#026440'}
-          primaryColor={theme.rawColors.primary}
-          // borderColor={theme.rawColors.background}
           borderColor={theme.rawColors.secondary}
-          source={'https://storage.googleapis.com/drc-drought-forecast/vector'}
-          variable={'drought'}
         />
 
         {showLandOutline && (
@@ -151,8 +118,6 @@ const Map = ({ mobile }) => {
             - https://turfjs.org/docs/api/booleanIntersects
         */}
 
-        <Ruler mobile={mobile} />
-
         <ZoomReset mobile={mobile} />
 
         <Router />
@@ -166,7 +131,7 @@ const Map = ({ mobile }) => {
           display: ['initial', 'initial', 'initial', 'initial'],
           position: 'absolute',
           color: 'primary',
-          right: [70],
+          right: [3],
           bottom: [20, 20, 20, 20],
         }}
       />
