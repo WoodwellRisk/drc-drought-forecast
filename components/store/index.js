@@ -2,7 +2,8 @@ import { makeColormap } from '@carbonplan/colormaps';
 import { create } from 'zustand';
 
 const MIN_HISTORICAL_DATE = '1991-01-01';
-const MAX_HISTORICAL_DATE = '2026-05-01';
+// const MAX_HISTORICAL_DATE = '2026-07-01';
+const MAX_HISTORICAL_DATE = '2025-09-01';
 const INITIAL_FORECAST_DATE = '2025-10-01';
 
 export const arrayRange = (start, end, step) => {
@@ -82,7 +83,8 @@ export const useStore = create((set, get) => ({
   zoom: 3,
   setZoom: (zoom) => set({ zoom }),
 
-  minZoom: 1,
+  // minZoom: 1,
+  minZoom: 2,
   maxZoom: 7,
 
   // this is for the initial map load
@@ -92,8 +94,8 @@ export const useStore = create((set, get) => ({
 
   // https://docs.mapbox.com/mapbox-gl-js/example/fitbounds/
   // [west, south, east, north]
-  // bounds: [-31.0, -41.5, 74.0, 45.0],
-  bounds: [-50.0, -41.5, 95.0, 45.0],
+  bounds: [-11.0, -31.5, 64.0, 35.0],
+  // bounds: [-50.0, -41.5, 95.0, 45.0],
 
   variableArray: ['percent', 'precip'],
   variable: 'percent',
@@ -226,6 +228,9 @@ export const useStore = create((set, get) => ({
     return [climRanges[variable].min, climRanges[variable].max];
   },
 
+  raster: { current: null },
+  setRaster: (ref) => set((state) => ({ raster: ref })),
+
   historicalRaster: { current: null },
   setHistoricalRaster: (ref) => set((state) => ({ historicalRaster: ref })),
 
@@ -256,8 +261,11 @@ export const useStore = create((set, get) => ({
   sliding: false,
   setSliding: (sliding) => set({ sliding }),
 
-  showSettings: false,
-  setShowSettings: (showSettings) => set({ showSettings }),
+  showDesktopSettings: true,
+  setShowDesktopSettings: (showDesktopSettings) => set({ showDesktopSettings }),
+
+  showMobileSettings: false,
+  setShowMobileSettings: (showMobileSettings) => set({ showMobileSettings }),
 
   showAbout: false,
   setShowAbout: (showAbout) => set({ showAbout }),

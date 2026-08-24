@@ -5,8 +5,8 @@ import Settings from './settings';
 import { useStore } from '../store/index';
 
 export default function MobileSettingsContainer() {
-  const showSettings = useStore((state) => state.showSettings);
-  const setShowSettings = useStore((state) => state.setShowSettings);
+  const showMobileSettings = useStore((state) => state.showMobileSettings);
+  const setShowMobileSettings = useStore((state) => state.setShowMobileSettings);
   const timePeriod = useStore((state) => state.timePeriod);
 
   return (
@@ -32,9 +32,9 @@ export default function MobileSettingsContainer() {
           as="div"
           role="button"
           onClick={() => {
-            setShowSettings(false);
+            setShowMobileSettings(false);
           }}
-          sx={{ bg: !showSettings ? alpha('muted', 0.5) : 'background' }}
+          sx={{ bg: !showMobileSettings ? alpha('muted', 0.5) : 'background' }}
         >
           Map
         </Box>
@@ -43,15 +43,15 @@ export default function MobileSettingsContainer() {
           as="div"
           role="button"
           onClick={() => {
-            setShowSettings(true);
+            setShowMobileSettings(true);
           }}
-          sx={{ bg: showSettings ? alpha('muted', 0.5) : 'background' }}
+          sx={{ bg: showMobileSettings ? alpha('muted', 0.5) : 'background' }}
         >
           Settings
         </Box>
       </Box>
 
-      {showSettings && (
+      {showMobileSettings && (
         <Box
           as="div"
           id="settings-container-mobile"

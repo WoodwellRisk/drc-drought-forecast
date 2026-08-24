@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Box, Button, Input, Select, Slider, Text } from 'theme-ui';
+import { Box, Button, IconButton, Input, Select, Slider, Text } from 'theme-ui';
 import { useBreakpointIndex } from '@theme-ui/match-media';
 import { alpha } from '@theme-ui/color';
+import { X } from '@carbonplan/icons';
 
 import { Info } from '../view/index';
 import { arrayRange, useStore } from '../store/index';
@@ -41,12 +42,8 @@ export default function Settings() {
   // time slider
   const [sliderIndex, setSliderIndex] = useState(forecastDates.length - 1);
   const [maxSliderIndex, setMaxSliderIndex] = useState(forecastDates.length - 1);
-  const [minSliderYear, setMinSliderYear] = useState(
-    new Date(forecastDates.at(0) + 'T00:00:00').getFullYear()
-  );
-  const [maxSliderYear, setMaxSliderYear] = useState(
-    new Date(forecastDates.at(-1) + 'T00:00:00').getFullYear()
-  );
+  const [minSliderYear, setMinSliderYear] = useState(Number(forecastDates.at(0).split('-')[0]));
+  const [maxSliderYear, setMaxSliderYear] = useState(Number(forecastDates.at(-1).split('-')[0]));
 
   const [defaultSkipYear, defaultSkipMonth, _] = maxHistoricalDate.split('-');
   const [skipMonth, setSkipMonth] = useState(defaultSkipMonth);
@@ -184,12 +181,14 @@ export default function Settings() {
     let index = timePeriod == 'historical' ? historicalDates.length - 1 : 0;
     let t = timePeriod == 'historical' ? historicalDates.at(index) : forecastDates.at(index);
     let maxIndex = timePeriod == 'historical' ? historicalDates.length - 1 : 5;
-    let minYear = new Date(
-      timePeriod == 'historical' ? historicalDates.at(0) : forecastDates.at(0) + 'T00:00:00'
-    ).getFullYear();
-    let maxYear = new Date(
-      timePeriod == 'historical' ? historicalDates.at(-1) : forecastDates.at(-1) + 'T00:00:00'
-    ).getFullYear();
+    let minYear =
+      timePeriod == 'historical'
+        ? Number(historicalDates.at(0).split('-')[0])
+        : Number(forecastDates.at(0).split('-')[0]);
+    let maxYear =
+      timePeriod == 'historical'
+        ? Number(historicalDates.at(-1).split('-')[0])
+        : Number(forecastDates.at(-1).split('-')[0]);
 
     setSliderIndex(index);
     setMaxSliderIndex(maxIndex);
@@ -230,6 +229,24 @@ export default function Settings() {
   return (
     <>
       <Box sx={sx['settings-container']}>
+        {/* {isWide && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }} id="hide-settings-container">
+            <IconButton
+              aria-label="hide desktop settings container"
+              // onClick={() => setShowDesktopSettings(false)}
+              sx={{
+                float: 'right',
+                stroke: 'primary',
+                cursor: 'pointer',
+                width: 24,
+                height: 24,
+              }}
+            >
+              <X />
+            </IconButton>
+          </Box>
+        )} */}
+
         <Box sx={{ mt: -3 }} id="var-container">
           <Box as="div" sx={sx.title} id="var-title">
             Layers <Info>View precipitation either as a percentile (%) or monthly total (mm).</Info>
@@ -243,7 +260,7 @@ export default function Settings() {
             {variableOptions}
           </Box>
 
-          {timePeriod == 'forecast' && (
+          {/* {timePeriod == 'forecast' && (
             <Box id="confidence-layers">
               <Box as="div" sx={sx.title} id="confidence-title">
                 Confidence level <Info>Select a confidence level to view.</Info>
@@ -257,7 +274,7 @@ export default function Settings() {
                 {confidenceOptions}
               </Box>
             </Box>
-          )}
+          )} */}
 
           <Box id="time-slider-container">
             <Box sx={{ ...sx.title, mb: [2] }}>{`Date: ${time}`}</Box>
