@@ -36,9 +36,11 @@ const LayerOrder = () => {
     // https://docs.mapbox.com/mapbox-gl-js/api/map/#map#movelayer
     // build the complete target order list from bottom to top
     // map.moveLayer(a, b) will put a below b
-    // map.moveLayer('forecast-raster', 'historical-raster')
-    map.moveLayer('forecast-raster', lakesFill.id);
+    // map.moveLayer('countries-fill', lakesFill.id);
+    // map.moveLayer('forecast-raster', 'historical-raster');
+    // map.moveLayer('forecast-raster', lakesFill.id);
     // map.moveLayer('historical-raster', lakesFill.id);
+    map.moveLayer('raster', lakesFill.id);
     map.moveLayer(lakesFill.id, lakes.id);
     map.moveLayer(lakes.id, ocean.id);
     map.moveLayer(ocean.id, land.id);

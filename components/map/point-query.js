@@ -14,23 +14,24 @@ export default function PointQuery({ key, id }) {
   const layerIdRef = useRef();
 
   const variable = useStore((state) => state.variable);
+  const confidenceArray = useStore((state) => state.confidenceArray);
   const timePeriod = useStore((state) => state.timePeriod);
+  const time = useStore((state) => state.time);
   const historicalDates = useStore((state) => state.historicalDates);
   const forecastDates = useStore((state) => state.forecastDates);
-  const historicalRaster = useStore((state) => state.historicalRaster);
-  const forecastRaster = useStore((state) => state.forecastRaster);
+  const raster = useStore((state) => state.raster);
 
   const queryPoint = map.getCenter();
   const [coords, setCoords] = useState([queryPoint['lng'], queryPoint['lat']]);
   const setPlotData = useStore((state) => state.setPlotData);
 
-  function toFourDecimalPlaces(num) {
-    return parseFloat(num.toFixed(4));
+  function toTwoDecimalPlaces(num) {
+    return parseFloat(num.toFixed(2));
   }
 
   const [coordinates, setCoordinates] = useState([
-    `Longitude: ${toFourDecimalPlaces(coords[0])}`,
-    `Latitude: ${toFourDecimalPlaces(coords[1])}`,
+    `Longitude: ${toTwoDecimalPlaces(coords[0])}`,
+    `Latitude: ${toTwoDecimalPlaces(coords[1])}`,
   ]);
 
   // https://docs.mapbox.com/mapbox-gl-js/example/drag-a-point/
@@ -101,8 +102,8 @@ export default function PointQuery({ key, id }) {
       setCoords([coords.lng, coords.lat]);
 
       setCoordinates([
-        `Longitude: ${toFourDecimalPlaces(coords.lng)}`,
-        `Latitude:   ${toFourDecimalPlaces(coords.lat)}`,
+        `Longitude: ${toTwoDecimalPlaces(coords.lng)}`,
+        `Latitude:   ${toTwoDecimalPlaces(coords.lat)}`,
       ]);
 
       map.getCanvas().style.cursor = '';
@@ -144,6 +145,51 @@ export default function PointQuery({ key, id }) {
       map.once('touchend', onUp);
     });
 
+    // map.on('click', (e) => {
+    //   // console.log(e)
+    //   const coords = e.lngLat;
+    //   // console.log([coords.lng, coords.lat])
+    //   if (!raster) return;
+
+    //   try {
+    //     let query;
+    //     if (timePeriod == 'forecast') {
+    //       query = { time: forecastDates, variable: variable, confidence: confidenceArray }
+    //     } else {
+    //       query = { time: historicalDates, variable: variable, confidence: 50 }
+    //     }
+    //     const rasterQuery = raster.queryData(
+    //       { type: 'Point', coordinates: [coords.lng, coords.lat] },
+    //       query
+    //     ).then((result) => {
+    //       console.log(result)
+    //     });
+
+    //     // setPlotData(rasterQuery);
+    //   } catch (error) {
+    //     console.error('Error querying raster:', error);
+    //   }
+    // })
+
+    // map.on('mousemove', (e) => {
+    //   function hoverQuery() {
+    //     let query;
+    //     console.log(coords)
+    //     // if (timePeriod == 'forecast') {
+    //     //   query = { time: forecastDates, variable: variable, confidence: confidenceArray }
+    //     // } else {
+    //     //   query = { time: historicalDates, variable: variable }
+    //     // }
+    //     // const rasterQuery = raster.queryData(
+    //     //   { type: 'Point', coordinates: coords },
+    //     //   query
+    //     // ).then((result) => {
+    //     //   console.log(result)
+    //     // })
+    //   }
+    //   setTimeout(hoverQuery, 120)
+    // })
+
     return () => {
       if (!removed.current) {
         if (map.getLayer(layerId)) {
@@ -154,55 +200,47 @@ export default function PointQuery({ key, id }) {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      // if (!historicalRaster || !forecastRaster) return;
-      if (!forecastRaster) return;
-
-      // give the rasters time to load
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // try {
-      //   const historicalResult = await historicalRaster.queryData(
-      //     { type: 'Point', coordinates: coords },
-      //     { time: historicalDates }
-      //   );
-      //   console.log(historicalResult);
-      // } catch (error) {
-      //   console.error('Error querying historical raster:', error);
-      // }
-
+    let rasterQuery = () => {
       try {
-        const forecastQuery = await forecastRaster.queryData(
-          { type: 'Point', coordinates: coords },
-          { time: forecastDates }
-          // { variable: ['percent', 'precip']},
-        );
-        setPlotData(forecastQuery);
+        const rasterQuery = raster
+          .queryData(
+            { type: 'Point', coordinates: coords },
+            {
+              time: timePeriod == 'forecast' ? forecastDates : historicalDates,
+              variable: variable,
+              confidence: timePeriod == 'forecast' ? confidenceArray : 50,
+            }
+          )
+          .then((result) => {
+            // console.log(result)
+            if (timePeriod == 'forecast') setPlotData(result);
+          });
       } catch (error) {
-        console.error('Error querying forecast raster:', error);
+        console.error('Error querying raster:', error);
       }
-    })();
-    // }, [historicalRaster, coords]);
-  }, [forecastRaster, coords]);
+    };
+    setTimeout(rasterQuery, 150);
+  }, [raster, variable, coords, timePeriod]);
 
   return (
     <Box
       as="div"
       id={'coordinates-container'}
       sx={{
-        borderColor: 'primary',
-        borderStyle: 'solid',
-        borderWidth: '1px',
-        borderRadius: '0.2rem',
-        color: '#fff',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        zIndex: 10,
         position: 'absolute',
         right: [2],
         bottom: [50],
+        zIndex: 10,
+        // width: '8.75rem',
+        display: coordinates ? 'block' : 'none',
+        color: '#fff',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
         padding: '0.3rem 0.7rem',
         margin: 0,
-        display: coordinates ? 'block' : 'none',
+        borderWidth: '1px',
+        borderColor: 'primary',
+        borderStyle: 'solid',
+        borderRadius: '0.2rem',
         fontWeight: 'bold',
         fontSize: '0.9rem',
         lineHeight: '1.2rem',

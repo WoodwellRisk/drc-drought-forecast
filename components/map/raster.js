@@ -5,30 +5,34 @@ import { useMap } from './map-provider';
 import { useMapView } from './use-map-view';
 import { useStore } from '../store/index';
 
-const Raster = ({ id, source, opacity, setRaster }) => {
+const Raster = ({ id, source, setRaster }) => {
   const zarrLayerRef = useRef(null);
   const removed = useRef(false);
   const { map } = useMap();
   const { zoom, center } = useMapView();
 
+  const timePeriod = useStore((state) => state.timePeriod);
   const clim = useStore((state) => state.clim)();
   const colormap = useStore((state) => state.colormap)();
   const variable = useStore((state) => state.variable);
   const confidence = useStore((state) => state.confidence);
+  const confidenceArray = useStore((state) => state.confidenceArray);
   const time = useStore((state) => state.time);
 
-  // useEffect(() => {
-  //   if (!zarrLayerRef.current) return;
+  useEffect(() => {
+    if (!zarrLayerRef.current) return;
 
-  //   if (zoom < 4.5) zarrLayerRef.current.setUniforms({ u_zoom: zoom });
-  //   if (zoom >= 4.5) zarrLayerRef.current.setUniforms({ u_zoom: zoom });
-  // }, [zoom]);
+    if (zoom < 4.5) zarrLayerRef.current.setUniforms({ u_zoom: zoom });
+    if (zoom >= 4.5) zarrLayerRef.current.setUniforms({ u_zoom: zoom });
+  }, [zoom]);
 
   const customFrag = `
-    const float TILE_SIZE = 256.0;
+    uniform float u_texWidth;
+    uniform float u_texHeight;
     // uniform float u_var;
     uniform float u_zoom;
-    const float ZOOM_THRESHOLD = 4.5;
+    const float ZOOM_THRESHOLD = 5.0;
+
     // 0 at low zooms, 5% of a pixel width at medium / high zooms
     float borderWidth = (u_zoom >= ZOOM_THRESHOLD) ? 0.1 : 0.0;
 
@@ -54,23 +58,33 @@ const Raster = ({ id, source, opacity, setRaster }) => {
     // base color with opacity
     vec4 baseColor = vec4(c.rgb, opacity);
 
-    // assuming pix_coord is 0.0 to 1.0
-    vec2 texelSize = 1.0 / vec2(TILE_SIZE);
-    
-    // calculate the center of the current pixel in normalized space
-    // floor(pix_coord / texelSize) gives the pixel index (0 to 255)
-    // + 0.5 gives the center of that pixel
-    vec2 pixelIndex = floor(pix_coord * TILE_SIZE) + 0.5;
-    vec2 texelCenter = pixelIndex / TILE_SIZE;
-    
-    float dist = distance(pix_coord, texelCenter);
-    // half the width of one pixel
-    float maxDist = 0.5 * texelSize.x;
-    
+    // only show data as points when we are above a certain zoom threshold
+    if (u_zoom < ZOOM_THRESHOLD) {
+      fragColor = baseColor;
+      return;
+    }
+
+    // here, we use sample_coord instead of pix_coord
+    // sample_coord should be the actual texture coordinate (0-1 in texture space)
+    // after the base shader's reprojection logic
+    vec2 pixelSpace = sample_coord * vec2(u_texWidth, u_texHeight);
+    vec2 texelCenter = floor(pixelSpace) + 0.5;
+    float dist = distance(pixelSpace, texelCenter);
+    float maxDist = 0.5;
+
+    // float ringInner = maxDist * 0.85;
+    // float ringOuter = maxDist * 0.95;
+
+    // if (dist >= ringInner && dist <= ringOuter) {
+    //   fragColor = vec4(0.0, 0.0, 0.0, opacity);
+    // } else {
+    //   fragColor = baseColor;
+    // }
+
     // radius settings
     // in the future, we will need to base radiusFactor on the 'agree' variable in our data
     // circle fills 90% of the pixel
-    float radiusFactor = 0.9;
+    float radiusFactor = 0.90;
     float outerRadius = maxDist * radiusFactor;
     float innerRadius = maxDist * (radiusFactor - borderWidth);
     
@@ -99,32 +113,44 @@ const Raster = ({ id, source, opacity, setRaster }) => {
     });
   }, [map]);
 
-  useEffect(() => {
-    if (!map) return;
+  useEffect(
+    () => {
+      if (!map) return;
 
-    const zarrLayer = new ZarrLayer({
-      id: id,
-      source: source,
-      zarrVersion: 2,
-      variable: variable,
-      clim: clim,
-      colormap: colormap,
-      opacity: opacity,
-      selector: { variable: variable, time: time, confidence: confidence },
-      // uniforms: { u_zoom: zoom, u_var: variable == 'percent' ? 0 : 1 },
-      // uniforms: { u_zoom: zoom },
-      // customFrag: customFrag,
-      // customFrag: '',
-    });
-    map.addLayer(zarrLayer);
-    zarrLayerRef.current = zarrLayer;
-    setRaster(zarrLayer);
+      const zarrLayer = new ZarrLayer({
+        id: id,
+        source: source,
+        // zarrVersion: 2,
+        zarrVersion: 3,
+        // variable: timePeriod == 'forecast' || variable == 'precip' ? variable : 'perc',
+        // clim: timePeriod == 'forecast' || variable == 'precip' ? clim : [0, 1],
+        variable: variable,
+        clim: clim,
+        colormap: colormap,
+        selector: { variable: variable, time: time, confidence: confidence },
+        uniforms: {
+          u_zoom: zoom,
+          u_var: variable == 'percent' ? 0 : 1,
+          u_texWidth: 173.0,
+          u_texHeight: 137.0,
+        },
+        customFrag: timePeriod == 'forecast' ? customFrag : '',
+        // uniforms: { u_zoom: zoom },
+        // customFrag: '',
+      });
+      map.addLayer(zarrLayer);
+      zarrLayerRef.current = zarrLayer;
+      setRaster(zarrLayer);
 
-    return () => {
-      let layerId = id;
-      if (map.getLayer(layerId)) map.removeLayer(layerId);
-    };
-  }, [map, variable]);
+      return () => {
+        let layerId = id;
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+      };
+      // }, [map, variable, timePeriod]);
+    },
+    [map, variable],
+    timePeriod
+  );
 
   useEffect(() => {
     if (!map || !zarrLayerRef.current) return;
@@ -147,12 +173,12 @@ const Raster = ({ id, source, opacity, setRaster }) => {
     layer.setSelector({ variable: variable, confidence: confidence, time: time });
   }, [map, confidence]);
 
-  useEffect(() => {
-    if (!map || !zarrLayerRef.current) return;
-    let layer = zarrLayerRef.current;
+  // useEffect(() => {
+  //   if (!map || !zarrLayerRef.current) return;
+  //   let layer = zarrLayerRef.current;
 
-    layer.setOpacity(opacity);
-  }, [map, opacity]);
+  //   layer.setOpacity(opacity);
+  // }, [map, opacity]);
 
   return null;
 };

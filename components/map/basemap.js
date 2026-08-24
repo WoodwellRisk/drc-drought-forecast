@@ -19,7 +19,7 @@ const Basemap = () => {
 
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: { version: 8, sources: {}, layers: [] },
+      style: { version: 8, sources: {}, layers: [] }, // projection: {type: 'globe'} },
       center: initialCenter,
       zoom: initialZoom,
       minZoom: minZoom,

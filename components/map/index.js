@@ -23,6 +23,7 @@ export const Map = () => {
   const forecastDate = useStore((state) => state.forecastDate);
   const maxHistoricalDate = useStore((state) => state.maxHistoricalDate);
 
+  const setRaster = useStore((state) => state.setRaster);
   const setHistoricalRaster = useStore((state) => state.setHistoricalRaster);
   const setForecastRaster = useStore((state) => state.setForecastRaster);
 
@@ -36,18 +37,38 @@ export const Map = () => {
     <MapProvider>
       <Basemap />
 
+      {/* {showCountriesLayer && (
+        <Fill
+          id={'countries-fill'}
+          color={theme.rawColors.primary}
+          source={'https://storage.googleapis.com/cadf/vector/countries'}
+          variable={'countries'}
+        />
+      )} */}
+
       {/* <Raster
+        // key={`${timePeriod}-${variable}`}
         id={`historical-raster`}
-        source={`https://storage.googleapis.com/water-balance/zarr/viz/wb-h${window}-${maxHistoricalDate}.zarr`}
+        source={variable == 'percent' ? `https://storage.googleapis.com/water-balance/zarr/viz/wb-h3-${maxHistoricalDate}.zarr` : `https://storage.googleapis.com/water-balance/zarr/viz/precip-h-${maxHistoricalDate}.zarr`}
         opacity={timePeriod == 'forecast' ? 0 : 1}
         setRaster={setHistoricalRaster}
-      /> */}
+      />
 
       <Raster
         id={`forecast-raster`}
         source={`https://storage.googleapis.com/cadf/zarr/viz/precip-f-2025-09-01.zarr`}
         opacity={timePeriod == 'forecast' ? 1 : 0}
         setRaster={setForecastRaster}
+      /> */}
+
+      <Raster
+        id={`raster`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf.zarr`}
+        source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v3.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-rechunk-confidence.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-rechunk-confidence-xy.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-pyramid.zarr`}
+        setRaster={setRaster}
       />
 
       {showLakesLayer && (
