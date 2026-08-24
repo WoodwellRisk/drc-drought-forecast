@@ -16,8 +16,10 @@ export default function Index() {
   const container = useRef(null);
 
   const showMenu = useStore((store) => store.showMenu);
+  const showDesktopSettings = useStore((store) => store.showDesktopSettings);
   const showCharts = useStore((store) => store.showCharts);
   const setShowCharts = useStore((store) => store.setShowCharts);
+  const timePeriod = useStore((store) => store.timePeriod);
   const plotData = useStore((store) => store.plotData);
 
   useEffect(() => {
@@ -29,6 +31,12 @@ export default function Index() {
       setShowCharts(false);
     }
   }, [isWide]);
+
+  useEffect(() => {
+    if (timePeriod == 'historical') {
+      setShowCharts(false);
+    }
+  }, [timePeriod]);
 
   return (
     <>
@@ -42,14 +50,14 @@ export default function Index() {
 
           <Map />
 
-          {isWide && <DesktopSettings />}
+          {isWide && showDesktopSettings && <DesktopSettings />}
 
           {isWide && showCharts && !showMenu && (
             <>
               {/* 
-               The ChartContainer component places the chart on the page.
-               The Chart component ensures good padding and margins, plus loads the fonts that individual charts will need.
-               Then individual charts are returned as SVGs that span the entire width and height of the ChartContainer component.
+               The ChartContainer component places the chart on the page, ensures good padding and margins, 
+               plus loads the fonts that individual charts will need. Then individual charts are returned as 
+               SVGs that span the entire width and height of the ChartContainer component.
              */}
               <ChartContainer>
                 <DotChart />
