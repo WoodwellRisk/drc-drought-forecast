@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Box, IconButton, Text } from 'theme-ui';
+import { Box, Button, IconButton, Text } from 'theme-ui';
 import { alpha } from '@theme-ui/color';
 import { useBreakpointIndex } from '@theme-ui/match-media';
 import { QuestionCircle, X } from '@carbonplan/icons';
@@ -18,9 +18,11 @@ export default function Header() {
   const showAbout = useStore((state) => state.showAbout);
   const setShowAbout = useStore((state) => state.setShowAbout);
   const timePeriod = useStore((state) => state.timePeriod);
-  // const timePeriodOptions = useStore((state) => state.timePeriodOptions);
-  // const setTimePeriodOptions = useStore((state) => state.setTimePeriodOptions);
+  const timePeriodOptions = useStore((state) => state.timePeriodOptions);
+  const setTimePeriodOptions = useStore((state) => state.setTimePeriodOptions);
   const setTimePeriod = useStore((state) => state.setTimePeriod);
+  const showDesktopSettings = useStore((state) => state.showDesktopSettings);
+  const setShowDesktopSettings = useStore((state) => state.setShowDesktopSettings);
   const showCharts = useStore((state) => state.showCharts);
   const setShowCharts = useStore((state) => state.setShowCharts);
   const setPlotData = useStore((state) => state.setPlotData);
@@ -30,10 +32,6 @@ export default function Header() {
       setPlotData({});
     }
   }, [showCharts]);
-
-  useEffect(() => {
-    console.log(timePeriod);
-  }, [timePeriod]);
 
   return (
     <Box as="div" id="header" sx={{ position: 'relative', bg: alpha('muted', 0.5) }}>
@@ -52,27 +50,13 @@ export default function Header() {
       >
         {/* <Dimmer aria-label='Change theme to light or dark' /> */}
 
-        {/* 
+        {/* {isWide && (
           <Filter
             id={'time-period-selector'}
             values={timePeriodOptions}
             setValues={setTimePeriodOptions}
           /> 
-        */}
-
-        {/* <Select
-          id={'time-period-selector'}
-          sx={{
-            width: '7rem',
-            p: ' 0.25rem 0.75rem',
-            mr: '0.25rem',
-          }}
-          defaultValue={'forecast'}
-          onChange={(e) => setTimePeriod(e.target.value)}
-        >
-          <option value="historical">Historical</option>
-          <option value="forecast">Forecast</option>
-        </Select> */}
+        )} */}
 
         <IconButton
           key="charts"
@@ -85,6 +69,7 @@ export default function Header() {
           sx={{
             // stroke: showMenu ? alpha('primary', 0.75) : 'primary',
             display: isWide && timePeriod == 'forecast' ? 'initial' : 'none',
+            // display: isWide ? 'initial' : 'none',
             stroke: 'primary',
             cursor: !showMenu ? 'pointer' : 'not-allowed',
             '&:hover': {
@@ -117,6 +102,51 @@ export default function Header() {
         >
           Please exit from menu before continuing
         </Box>
+
+        <Select
+          id={'time-period-selector'}
+          sx={{
+            // width: '7rem',
+            p: ' 0.25rem 0.75rem',
+            mr: '0.25rem',
+          }}
+          defaultValue={'forecast'}
+          onChange={(e) => setTimePeriod(e.target.value)}
+        >
+          <option value="historical">Historical</option>
+          <option value="forecast">Forecast</option>
+        </Select>
+
+        {isWide && (
+          <Button
+            sx={{
+              width: '8.75rem',
+              height: ['2rem'],
+              lineHeight: '100%',
+              color: 'secondary',
+              bg: 'background',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'secondary',
+              borderRadius: '5px',
+              fontSize: [2],
+              fontFamily: 'body',
+              letterSpacing: 'body',
+              textAlign: 'center',
+              '&:hover': {
+                color: 'primary',
+                borderColor: 'primary',
+              },
+              '&:active': {
+                color: 'white',
+                bg: 'primary',
+              },
+            }}
+            onClick={() => setShowDesktopSettings(!showDesktopSettings)}
+          >
+            <Text>{showDesktopSettings ? 'Hide settings' : 'Show settings'}</Text>
+          </Button>
+        )}
 
         <IconButton
           key="info"
