@@ -6,8 +6,11 @@ import MapProvider from './map-provider';
 import Basemap from './basemap';
 import Fill from './fill';
 import Line from './line';
-import Raster from './raster';
+import { HistoricalRaster } from './raster/index';
+// import Raster from './raster';
+// import BandRaster from './raster-bands';
 import PointQuery from './point-query';
+import PointQueryZarrita from './query/point-query-zarrita';
 import Router from './router';
 import ZoomReset from './zoom-reset';
 import LayerOrder from './layer-order';
@@ -61,15 +64,25 @@ export const Map = () => {
         setRaster={setForecastRaster}
       /> */}
 
-      <Raster
+      {/* <Raster
         id={`raster`}
         // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf.zarr`}
         source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v3.zarr`}
-        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-rechunk-confidence.zarr`}
-        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-rechunk-confidence-xy.zarr`}
-        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-pyramid.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v3-rechunk-confidence.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v3-rechunk-confidence-xy.zarr`}
+        opacity={timePeriod == 'forecast' ? 1 : 0}
         setRaster={setRaster}
-      />
+      /> */}
+
+      {/* <BandedRaster
+        id={`raster`}
+        source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v2-bands.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v2-bands-topozarr.zarr`}
+        // source={`https://storage.googleapis.com/cadf/zarr/viz/cadf-v3-bands-topozarr.zarr`}
+        setRaster={setRaster}
+      /> */}
+
+      {timePeriod == 'historical' && <HistoricalRaster id={`raster`} setRaster={setRaster} />}
 
       {showLakesLayer && (
         <>
@@ -127,7 +140,8 @@ export const Map = () => {
         />
       )}
 
-      {showCharts && <PointQuery />}
+      {/* {true && <PointQueryZarrita />} */}
+      {/* {true && <PointQuery />} */}
 
       <Router />
 

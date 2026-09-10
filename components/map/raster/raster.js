@@ -5,7 +5,7 @@ import { useMap } from './map-provider';
 import { useMapView } from './use-map-view';
 import { useStore } from '../store/index';
 
-const Raster = ({ id, source, setRaster }) => {
+const Raster = ({ id, source, opacity, setRaster }) => {
   const zarrLayerRef = useRef(null);
   const removed = useRef(false);
   const { map } = useMap();
@@ -113,44 +113,39 @@ const Raster = ({ id, source, setRaster }) => {
     });
   }, [map]);
 
-  useEffect(
-    () => {
-      if (!map) return;
+  useEffect(() => {
+    if (!map) return;
 
-      const zarrLayer = new ZarrLayer({
-        id: id,
-        source: source,
-        // zarrVersion: 2,
-        zarrVersion: 3,
-        // variable: timePeriod == 'forecast' || variable == 'precip' ? variable : 'perc',
-        // clim: timePeriod == 'forecast' || variable == 'precip' ? clim : [0, 1],
-        variable: variable,
-        clim: clim,
-        colormap: colormap,
-        selector: { variable: variable, time: time, confidence: confidence },
-        uniforms: {
-          u_zoom: zoom,
-          u_var: variable == 'percent' ? 0 : 1,
-          u_texWidth: 173.0,
-          u_texHeight: 137.0,
-        },
-        customFrag: timePeriod == 'forecast' ? customFrag : '',
-        // uniforms: { u_zoom: zoom },
-        // customFrag: '',
-      });
-      map.addLayer(zarrLayer);
-      zarrLayerRef.current = zarrLayer;
-      setRaster(zarrLayer);
+    const zarrLayer = new ZarrLayer({
+      id: id,
+      source: source,
+      // zarrVersion: 2,
+      zarrVersion: 3,
+      // variable: timePeriod == 'forecast' || variable == 'precip' ? variable : 'perc',
+      // clim: timePeriod == 'forecast' || variable == 'precip' ? clim : [0, 1],
+      variable: variable,
+      clim: clim,
+      colormap: colormap,
+      selector: { variable: variable, time: time, confidence: confidence },
+      uniforms: {
+        u_zoom: zoom,
+        u_var: variable == 'percent' ? 0 : 1,
+        u_texWidth: 173.0,
+        u_texHeight: 137.0,
+      },
+      customFrag: timePeriod == 'forecast' ? customFrag : '',
+      uniforms: { u_zoom: zoom },
+      customFrag: '',
+    });
+    map.addLayer(zarrLayer);
+    zarrLayerRef.current = zarrLayer;
+    setRaster(zarrLayer);
 
-      return () => {
-        let layerId = id;
-        if (map.getLayer(layerId)) map.removeLayer(layerId);
-      };
-      // }, [map, variable, timePeriod]);
-    },
-    [map, variable],
-    timePeriod
-  );
+    return () => {
+      let layerId = id;
+      if (map.getLayer(layerId)) map.removeLayer(layerId);
+    };
+  }, [map, variable, timePeriod]);
 
   useEffect(() => {
     if (!map || !zarrLayerRef.current) return;
@@ -163,7 +158,8 @@ const Raster = ({ id, source, setRaster }) => {
     if (!map || !zarrLayerRef.current) return;
     let layer = zarrLayerRef.current;
 
-    layer.setSelector({ variable: variable, confidence: confidence, time: time });
+    // layer.setSelector({ variable: variable, confidence: confidence, time: time });
+    layer.setVariable(variable);
   }, [map, variable]);
 
   useEffect(() => {
@@ -173,12 +169,12 @@ const Raster = ({ id, source, setRaster }) => {
     layer.setSelector({ variable: variable, confidence: confidence, time: time });
   }, [map, confidence]);
 
-  // useEffect(() => {
-  //   if (!map || !zarrLayerRef.current) return;
-  //   let layer = zarrLayerRef.current;
+  useEffect(() => {
+    if (!map || !zarrLayerRef.current) return;
+    let layer = zarrLayerRef.current;
 
-  //   layer.setOpacity(opacity);
-  // }, [map, opacity]);
+    layer.setOpacity(opacity);
+  }, [map, opacity]);
 
   return null;
 };

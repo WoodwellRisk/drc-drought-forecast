@@ -110,7 +110,7 @@ export default function Header() {
             p: ' 0.25rem 0.75rem',
             mr: '0.25rem',
           }}
-          defaultValue={'forecast'}
+          defaultValue={timePeriod}
           onChange={(e) => setTimePeriod(e.target.value)}
         >
           <option value="historical">Historical</option>

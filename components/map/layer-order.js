@@ -11,7 +11,7 @@ const LayerOrder = () => {
   const confidence = useStore((state) => state.confidence);
   const showStatesLayer = useStore((state) => state.showStatesLayer);
   const showCountriesLayer = useStore((state) => state.showCountriesLayer);
-  const showRegionPicker = useStore((state) => state.showRegionPicker);
+  const showCharts = useStore((state) => state.showCharts);
 
   useEffect(() => {
     if (!map) return;
@@ -29,9 +29,7 @@ const LayerOrder = () => {
     let countries = showCountriesLayer
       ? layers.find((layer) => layer.source == 'countries')
       : undefined;
-    let pointQuery = showRegionPicker
-      ? layers.find((layer) => layer.source == `point-query`)
-      : undefined;
+    let pointQuery = showCharts ? layers.find((layer) => layer.source == `point-query`) : undefined;
 
     // https://docs.mapbox.com/mapbox-gl-js/api/map/#map#movelayer
     // build the complete target order list from bottom to top
@@ -48,15 +46,7 @@ const LayerOrder = () => {
     if (countries) map.moveLayer(countries.id, states?.id || land.id);
     if (states && countries) map.moveLayer(states.id, countries.id);
     if (pointQuery) map.moveLayer(land.id, pointQuery.id);
-  }, [
-    map,
-    showCountriesLayer,
-    showStatesLayer,
-    timePeriod,
-    variable,
-    confidence,
-    showRegionPicker,
-  ]);
+  }, [map, showCountriesLayer, showStatesLayer, timePeriod, variable, confidence]);
 
   return null;
 };

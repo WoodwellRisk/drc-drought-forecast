@@ -13,6 +13,7 @@ export default function DotChart() {
   const variable = useStore((state) => state.variable);
   const forecastDates = useStore((state) => state.forecastDates);
   const confidenceArray = useStore((state) => state.confidenceArray);
+  const confidence = useStore((state) => state.confidence);
   const colormap = useStore((state) => state.colormap)();
   const plotData = useStore((state) => state.plotData);
   const gintoUri = useStore((state) => state.gintoUri);
@@ -75,13 +76,10 @@ export default function DotChart() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    if (
-      !variable ||
-      !plotData ||
-      !plotData[variable] ||
-      Object.keys(plotData[variable]).length == 0
-    )
+    if (!variable || !plotData?.[variable]?.[confidence] || !plotData[variable][confidence]) {
+      setChartData({ data: null, tidyPoints: null });
       return;
+    }
 
     // format data
     // the data for plotting each line or row on the dot chart
@@ -169,6 +167,7 @@ export default function DotChart() {
         <g id={'x-axis'} transform={`translate(${extraPaddingX}, ${height - paddingBottom})`}>
           {/* axis line */}
           <line
+            key={`x-axis-line`}
             x1={xScale(0)}
             y1={0}
             x2={xScale(varMax)}
@@ -181,12 +180,14 @@ export default function DotChart() {
             <g key={idx} transform={`translate(${xScale(tick)}, 0)`}>
               {/* grid line */}
               <line
+                key={`tick-line-${idx}`}
                 y1={-0.5} // bottom of grid line
                 y2={6} // top of grid line
                 stroke="currentColor"
               />
               {/* tick */}
               <text
+                key={`tick-label-${idx}`}
                 style={{
                   fontSize: '0.625rem',
                   textAnchor: 'middle',
@@ -202,6 +203,7 @@ export default function DotChart() {
 
         <g id={'x-axis-label'}>
           <text
+            key={`x-label`}
             x={(width + paddingLeft) / 2}
             y={height - paddingXLabel - 10}
             textAnchor={'middle'}
@@ -213,10 +215,11 @@ export default function DotChart() {
         </g>
 
         <g id={'y-axis'} transform={`translate(${paddingLeft}, 0)`}>
-          {formattedDates.map((date, i) => {
+          {formattedDates.map((date, idx) => {
             return (
               <g className={'y-axis-label'}>
                 <text
+                  key={`y-label-${idx}`}
                   x={0 - paddingRight}
                   y={yScale(date) + yScale.bandwidth() / 2}
                   textAnchor={'middle'}

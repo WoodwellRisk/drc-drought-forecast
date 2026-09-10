@@ -1,10 +1,14 @@
 import { makeColormap } from '@carbonplan/colormaps';
 import { create } from 'zustand';
 
-const MIN_HISTORICAL_DATE = '1991-01-01';
+// const MIN_HISTORICAL_DATE = '1991-01-01';
+const MIN_HISTORICAL_DATE = '2021-01-01';
 // const MAX_HISTORICAL_DATE = '2026-07-01';
-const MAX_HISTORICAL_DATE = '2025-09-01';
-const INITIAL_FORECAST_DATE = '2025-10-01';
+// const MAX_HISTORICAL_DATE = '2025-09-01';
+const MAX_HISTORICAL_DATE = '2024-12-01';
+// const INITIAL_FORECAST_DATE = '2025-10-01';
+// const MIN_FORECAST_DATE = MIN_HISTORICAL_DATE;
+// const MAX_FORECAST_DATE = MAX_HISTORICAL_DATE;
 
 export const arrayRange = (start, end, step) => {
   let output = [];
@@ -52,13 +56,25 @@ const getDifferenceInMonths = (startDateString, endDateString) => {
   );
 };
 
+// const createForecastDates = () => {
+//   let forecastDate = INITIAL_FORECAST_DATE;
+//   let monthsRange = arrayRange(0, 6, 1);
+
+//   return {
+//     forecastDate: forecastDate,
+//     forecastDates: generateDates(forecastDate, monthsRange),
+//   };
+// };
+
 const createForecastDates = () => {
-  let forecastDate = INITIAL_FORECAST_DATE;
-  let monthsRange = arrayRange(0, 6, 1);
+  let minDate = MIN_HISTORICAL_DATE;
+  let maxDate = MAX_HISTORICAL_DATE;
+  let monthsBetweenDates = getDifferenceInMonths(minDate, maxDate);
+  let monthsRange = arrayRange(0, monthsBetweenDates, 1);
 
   return {
-    forecastDate: forecastDate,
-    forecastDates: generateDates(forecastDate, monthsRange),
+    forecastDate: maxDate,
+    forecastDates: generateDates(minDate, monthsRange),
   };
 };
 
@@ -94,11 +110,11 @@ export const useStore = create((set, get) => ({
 
   // https://docs.mapbox.com/mapbox-gl-js/example/fitbounds/
   // [west, south, east, north]
-  bounds: [-11.0, -31.5, 64.0, 35.0],
-  // bounds: [-50.0, -41.5, 95.0, 45.0],
+  // bounds: [-11.0, -31.5, 64.0, 35.0],
+  bounds: [-50.0, -41.5, 95.0, 45.0],
 
-  variableArray: ['percent', 'precip'],
-  variable: 'percent',
+  variableArray: ['percentile', 'total'],
+  variable: 'percentile',
   setVariable: (variable) => set({ variable }),
 
   variableIdx: 0,
@@ -111,6 +127,11 @@ export const useStore = create((set, get) => ({
   confidenceIdx: 2,
   setConfidenceIdx: (confidenceIdx) => set({ confidenceIdx }),
 
+  band: () => {
+    const { variable, confidence } = get();
+    return `${variable}_${confidence}`;
+  },
+
   // handle dates
   ...createForecastDates(),
   setForecastMonth: (forecastMonth) => set({ forecastMonth }),
@@ -121,8 +142,15 @@ export const useStore = create((set, get) => ({
   setHistoricalDate: (historicalDate) => set({ historicalDate }),
   setHistoricalSliderIndex: (historicalSliderIndex) => set({ historicalSliderIndex }),
 
-  time: INITIAL_FORECAST_DATE,
+  // time: INITIAL_FORECAST_DATE,
+  time: MAX_HISTORICAL_DATE,
   setTime: (time) => set({ time }),
+
+  // this is for the secondary forecast slider
+  lead: 1,
+  setLead: (lead) => set({ lead }),
+  leadIndex: 1,
+  setLeadIndex: (leadIndex) => set({ leadIndex }),
 
   // timePeriodOptions: { historical: false, forecast: true },
   // setTimePeriodOptions: (newOptions) => {
@@ -132,7 +160,7 @@ export const useStore = create((set, get) => ({
   //     timePeriod: timePeriod,
   //   });
   // },
-  timePeriod: 'forecast',
+  timePeriod: 'historical',
   setTimePeriod: (timePeriod) => set({ timePeriod }),
 
   showTimeError: false,
@@ -216,12 +244,12 @@ export const useStore = create((set, get) => ({
   ],
   colormap: () => {
     const { variable, redteal, cool } = get();
-    return variable == 'percent' ? redteal : cool;
+    return variable == 'percentile' ? redteal : cool;
   },
 
   climRanges: {
-    percent: { min: 0.0, max: 100.0 },
-    precip: { min: 0.0, max: 300.0 },
+    percentile: { min: 0.0, max: 100.0 },
+    total: { min: 0.0, max: 300.0 },
   },
   clim: () => {
     const { climRanges, variable } = get();
@@ -230,12 +258,6 @@ export const useStore = create((set, get) => ({
 
   raster: { current: null },
   setRaster: (ref) => set((state) => ({ raster: ref })),
-
-  historicalRaster: { current: null },
-  setHistoricalRaster: (ref) => set((state) => ({ historicalRaster: ref })),
-
-  forecastRaster: { current: null },
-  setForecastRaster: (ref) => set((state) => ({ forecastRaster: ref })),
 
   showCharts: false,
   setShowCharts: (showCharts) => set({ showCharts }),
@@ -276,6 +298,6 @@ export const useStore = create((set, get) => ({
   showOverlays: false,
   setShowOverlays: (showOverlays) => set({ showOverlays }),
 
-  defaultLabels: { percent: 'Percentile', precip: 'Monthly total' },
-  defaultUnits: { percent: '(%)', precip: '(mm)' },
+  defaultLabels: { percentile: 'Percentile', total: 'Monthly total' },
+  defaultUnits: { percentile: '(%)', total: '(mm)' },
 }));
